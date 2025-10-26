@@ -1,0 +1,240 @@
+import React, { useState, useEffect } from 'react';
+import './App.css';
+import Settings from './components/Settings';
+import ControlPanel from './components/ControlPanel';
+import ErrorList from './components/ErrorList';
+import SystemStatus from './components/SystemStatus';
+import api from './utils/api';
+import config from './config.json';
+
+// Material UI Icons
+import MenuIcon from '@mui/icons-material/Menu';
+import SettingsIcon from '@mui/icons-material/Settings';
+import CloseIcon from '@mui/icons-material/Close';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import ErrorIcon from '@mui/icons-material/Error';
+import LightModeIcon from '@mui/icons-material/LightMode';
+import DarkModeIcon from '@mui/icons-material/DarkMode';
+import SettingsBrightnessIcon from '@mui/icons-material/SettingsBrightness';
+import WifiIcon from '@mui/icons-material/Wifi';
+import WifiOffIcon from '@mui/icons-material/WifiOff';
+import EngineeringIcon from '@mui/icons-material/Engineering';
+import MonitorIcon from '@mui/icons-material/Monitor';
+import PublicIcon from '@mui/icons-material/Public';
+
+function App() {
+  const [activeTab, setActiveTab] = useState('control');
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [connectionStatus, setConnectionStatus] = useState('unknown');
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [theme, setTheme] = useState(() => {
+    const saved = localStorage.getItem('theme');
+    return saved || 'auto';
+  });
+  const [language, setLanguage] = useState(() => {
+    const saved = localStorage.getItem('language');
+    return saved || 'pl';
+  });
+  const [languageDropdownOpen, setLanguageDropdownOpen] = useState(false);
+
+  useEffect(() => {
+    // Apply theme
+    if (theme === 'auto') {
+      document.documentElement.removeAttribute('data-theme');
+    } else {
+      document.documentElement.setAttribute('data-theme', theme);
+    }
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  useEffect(() => {
+    // Rejestracja Service Workera
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/service-worker.js')
+        .then(reg => console.log('Service Worker zarejestrowany:', reg))
+        .catch(err => console.log('Service Worker error:', err));
+    }
+
+    // Test połączenia przy starcie
+    checkConnection();
+  }, []);
+
+  const checkConnection = async () => {
+    setIsConnecting(true);
+    const result = await api.testConnection();
+    setConnectionStatus(result.success ? 'connected' : 'disconnected');
+    setIsConnecting(false);
+  };
+
+  const handleSettingsSaved = () => {
+    checkConnection();
+    setSettingsOpen(false);
+  };
+
+  const toggleTheme = () => {
+    if (theme === 'light') setTheme('dark');
+    else if (theme === 'dark') setTheme('auto');
+    else setTheme('light');
+  };
+
+  const changeLanguage = (newLanguage) => {
+    setLanguage(newLanguage);
+    localStorage.setItem('language', newLanguage);
+    setLanguageDropdownOpen(false);
+  };
+
+  const getCurrentLanguageFlag = () => {
+    return language === 'pl' ? '🇵🇱' : '🇬🇧';
+  };
+
+  const t = (key) => {
+    try {
+      const langData = config.languages[language];
+      if (!langData) {
+        console.warn(`Language '${language}' not found in config, falling back to 'pl'`);
+        return config.languages['pl'][key] || key;
+      }
+      return langData[key] || key;
+    } catch (error) {
+      console.error('Translation error:', error);
+      return key;
+    }
+  };
+
+  const getThemeIcon = () => {
+    if (theme === 'light') return <LightModeIcon sx={{ fontSize: 24 }} />;
+    if (theme === 'dark') return <DarkModeIcon sx={{ fontSize: 24 }} />;
+    return <SettingsBrightnessIcon sx={{ fontSize: 24 }} />;
+  };
+
+  const getThemeLabel = () => {
+    if (theme === 'light') return t('lightMode');
+    if (theme === 'dark') return t('darkMode');
+    return t('autoMode');
+  };
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'control':
+        return <ControlPanel language={language} t={t} />;
+      case 'errors':
+        return <ErrorList language={language} t={t} />;
+      case 'system':
+        return <SystemStatus language={language} t={t} />;
+      default:
+        return <ControlPanel language={language} t={t} />;
+    }
+  };
+
+  const getStatusColor = () => {
+    if (isConnecting) return '#ffb300';
+    return connectionStatus === 'connected' ? '#43a047' : '#e53935';
+  };
+
+  return (
+    <div className="app">
+      {/* Side Drawer for Settings */}
+      <div className={`side-drawer ${settingsOpen ? 'open' : ''}`}>
+        <div className="drawer-header">
+          <h2><SettingsIcon sx={{ fontSize: 24, marginRight: 1 }} /> {t('connectionSettings')}</h2>
+          <button className="close-drawer" onClick={() => setSettingsOpen(false)}>
+            <CloseIcon sx={{ fontSize: 24 }} />
+          </button>
+        </div>
+        <div className="drawer-content">
+          <div className="theme-toggle" onClick={toggleTheme}>
+            {getThemeIcon()}
+            <span>{getThemeLabel()}</span>
+          </div>
+          <div className="language-selector">
+            <PublicIcon sx={{ fontSize: 20 }} />
+            <div className="custom-dropdown">
+              <button 
+                className="dropdown-trigger"
+                onClick={() => setLanguageDropdownOpen(!languageDropdownOpen)}
+              >
+                <span className="flag">{getCurrentLanguageFlag()}</span>
+                <span className="arrow">{languageDropdownOpen ? '▲' : '▼'}</span>
+              </button>
+              {languageDropdownOpen && (
+                <div className="dropdown-menu">
+                  <button 
+                    className={`dropdown-item ${language === 'pl' ? 'active' : ''}`}
+                    onClick={() => changeLanguage('pl')}
+                  >
+                    <span className="flag">🇵🇱</span>
+                    <span className="label">{t('polish')}</span>
+                  </button>
+                  <button 
+                    className={`dropdown-item ${language === 'en' ? 'active' : ''}`}
+                    onClick={() => changeLanguage('en')}
+                  >
+                    <span className="flag">🇬🇧</span>
+                    <span className="label">{t('english')}</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+          <Settings onSettingsSaved={handleSettingsSaved} language={language} t={t} />
+        </div>
+      </div>
+
+      {/* Overlay */}
+      {settingsOpen && (
+        <div className="drawer-overlay" onClick={() => setSettingsOpen(false)} />
+      )}
+
+      <header className="app-header">
+        <button className="hamburger-btn" onClick={() => setSettingsOpen(true)}>
+          <MenuIcon sx={{ fontSize: 24 }} />
+        </button>
+        <h1>
+          <EngineeringIcon sx={{ fontSize: 32, marginRight: 1 }} />
+          {t('appTitle')}
+        </h1>
+        <div className="connection-status">
+          {connectionStatus === 'connected' ? (
+            <WifiIcon sx={{ fontSize: 20, color: getStatusColor() }} />
+          ) : (
+            <WifiOffIcon sx={{ fontSize: 20, color: getStatusColor() }} />
+          )}
+          <button className="refresh-btn" onClick={checkConnection} disabled={isConnecting}>
+            <RefreshIcon sx={{ fontSize: 20 }} />
+          </button>
+        </div>
+      </header>
+
+      <nav className="tab-navigation">
+        <button 
+          className={`tab-btn ${activeTab === 'control' ? 'active' : ''}`}
+          onClick={() => setActiveTab('control')}
+        >
+          <DashboardIcon sx={{ fontSize: 20, marginRight: 1 }} />
+          {t('controlPanel')}
+        </button>
+        <button 
+          className={`tab-btn ${activeTab === 'errors' ? 'active' : ''}`}
+          onClick={() => setActiveTab('errors')}
+        >
+          <ErrorIcon sx={{ fontSize: 20, marginRight: 1 }} />
+          {t('errorList')}
+        </button>
+        <button 
+          className={`tab-btn ${activeTab === 'system' ? 'active' : ''}`}
+          onClick={() => setActiveTab('system')}
+        >
+          <MonitorIcon sx={{ fontSize: 20, marginRight: 1 }} />
+          {t('systemStatus')}
+        </button>
+      </nav>
+
+      <main className="app-content">
+        {renderContent()}
+      </main>
+    </div>
+  );
+}
+
+export default App;

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#03a9f4" rx="64"/>
+  <g fill="white">
+    <!-- Base/Platform -->
+    <rect x="106" y="384" width="300" height="42" rx="10"/>
+    
+    <!-- Vertical bars (signal/data) -->
+    <rect x="160" y="214" width="42" height="170" rx="8"/>
+    <rect x="235" y="149" width="42" height="235" rx="8"/>
+    <rect x="310" y="256" width="42" height="128" rx="8"/>
+    
+    <!-- Connection dots -->
+    <circle cx="181" cy="181" r="16"/>
+    <circle cx="256" cy="117" r="16"/>
+    <circle cx="331" cy="224" r="16"/>
+    
+    <!-- Diagnostic wave at top -->
+    <path d="M 133 85 Q 160 64 187 85 T 240 85 Q 267 64 293 85 T 347 85 Q 373 64 400 85" 
+          stroke="white" stroke-width="11" fill="none" stroke-linecap="round"/>
+  </g>
+</svg>
