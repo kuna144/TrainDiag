@@ -40,8 +40,8 @@ function ControlPanel({ language = 'pl', t = (key) => key }) {
       { id: 'button12', on: false }
     ], 
     analog: [
-      { id: 'analog1', value: 0 },
-      { id: 'analog2', value: 0 }
+      { id: 'ad4', value: 0 },
+      { id: 'ad5', value: 0 }
     ]
   });
   const [loading, setLoading] = useState(false);
@@ -127,7 +127,7 @@ function ControlPanel({ language = 'pl', t = (key) => key }) {
             {outputs.analog.map((sensor) => (
               <div key={sensor.id} className="sensor-card">
                 <div className="sensor-header">
-                  <span className="sensor-label">{sensor.id.toUpperCase()}</span>
+                  <span className="sensor-label">Analog IN{sensor.id === 'ad4' ? '1' : '2'}</span>
                 </div>
                 <div className="sensor-value">
                   {sensor.value}
@@ -143,7 +143,7 @@ function ControlPanel({ language = 'pl', t = (key) => key }) {
       <div className="controls-container">
         {/* Wyjścia LED - Sterowanie */}
         <div className="section controls-column">
-          <h3><LightbulbIcon sx={{ fontSize: 24, marginRight: 1 }} /> {t('manualControl')}</h3>
+          <h3><LightbulbIcon sx={{ fontSize: 24, marginRight: 1 }} /> {t('outputsSection')}</h3>
           <div className="output-grid">
             {outputs.leds.map((led) => (
               <div key={led.id} className="output-item">

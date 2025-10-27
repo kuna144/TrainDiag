@@ -102,11 +102,11 @@ class ControllerAPI {
         // No Content - zwróć domyślne wartości
         return {
           analog: [
-            { id: 'analog1', value: 0 },
-            { id: 'analog2', value: 0 }
+            { id: 'ad4', value: 0 },
+            { id: 'ad5', value: 0 }
           ],
-          buttons: Array.from({length: 12}, (_, i) => ({ id: `button${i+1}`, on: false, marked: false })),
-          leds: Array.from({length: 12}, (_, i) => ({ id: `led${i+1}`, on: false, marked: false }))
+          buttons: Array.from({length: 12}, (_, i) => ({ id: `button${i}`, on: false, marked: false })),
+          leds: Array.from({length: 12}, (_, i) => ({ id: `led${i}`, on: false, marked: false }))
         };
       }
       
@@ -168,6 +168,7 @@ class ControllerAPI {
       const id = text.getElementsByTagName('id')[0]?.textContent;
       const value = text.getElementsByTagName('value')[0]?.textContent.trim();
       if (id && value) {
+        console.log('Analog sensor:', id, value);
         result.analog.push({ id, value: parseInt(value) });
       }
     }
@@ -180,9 +181,10 @@ class ControllerAPI {
       const marked = checkbox.getElementsByTagName('marked')[0]?.textContent === 'true';
       
       if (id) {
-        if (id.startsWith('button')) {
+        console.log('Checkbox:', id, on, marked);
+        if (id.startsWith('button') && config.supportedInputs[id]) {
           result.buttons.push({ id, on, marked });
-        } else if (id.startsWith('led')) {
+        } else if (id.startsWith('led') && config.supportedOutputs[id]) {
           result.leds.push({ id, on, marked });
         }
       }

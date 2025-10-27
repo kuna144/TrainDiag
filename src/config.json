@@ -45,22 +45,22 @@
         "led11": "Output 12:\nFlush button green"
   },
   "supportedInputs": {
-    "button1": "Bowl Sensor",
-    "button2": "Water Sensor",
-    "button3": "Pressure Switch",
-    "button4": "n/c",
-    "button5": "n/c",
-    "button6": "n/c",
-    "button7": "n/c",
-    "button8": "n/c",
-    "button9": "Flush Button",
-    "button10": "WWT full sensor (waste tank)",
-    "button11": "Freeze Drain",
-    "button12": "Leakege sensor"
+    "button0": "Input 1:\nBowl Sensor",
+    "button1": "Input 2:\nWater Sensor",
+    "button2": "Input 3:\nPressure Switch",
+    "button3": "Input 4:\nInlet Valve Position",
+    "button4": "Input 5:\nn/c",
+    "button5": "Input 6:\nn/c",
+    "button6": "Input 7:\nn/c",
+    "button7": "Input 8:\nn/c",
+    "button8": "Input 9:\nFlush Button",
+    "button9": "Input 10:\nWWT full sensor (waste tank)",
+    "button10": "Input 11:\nFreeze Drain",
+    "button11": "Input 12:\nLeakege sensor"
   },
   "supportedSensors": {
-    "analog1": "Pressure sensor [mBar]",
-    "analog2": "nc(not connect) [mA]"
+    "ad4": "Pressure sensor [mBar]",
+    "ad5": "nc(not connect) [mA]"
   },
   "languages": {
     "pl": {
@@ -137,22 +137,22 @@
         "led11": "Wyjście 12:\nPrzycisk spłukiwania zielony"
       },
       "inputs": {
-        "button1": "Czujnik misy",
-        "button2": "Czujnik wody",
-        "button3": "Przełącznik ciśnienia",
-        "button4": "n/c",
-        "button5": "n/c",
-        "button6": "n/c",
-        "button7": "n/c",
-        "button8": "n/c",
-        "button9": "Przycisk spłukiwania",
-        "button10": "Czujnik zapełnienia WWT (zbiornik odpadów)",
-        "button11": "Opróżnienie mrozowe",
-        "button12": "Czujnik wycieków"
+        "button0": "Wejście 1\nCzujnik misy",
+        "button1": "Wejście 2\nCzujnik wody",
+        "button2": "Wejście 3\nPrzełącznik ciśnienia",
+        "button3": "Wejście 4\nPozycja zaworu wlotowego",
+        "button4": "Wejście 5\nn/c",
+        "button5": "Wejście 6\nn/c",
+        "button6": "Wejście 7\nn/c",
+        "button7": "Wejście 8\nn/c",
+        "button8": "Wejście 9\nPrzycisk spłukiwania",
+        "button9": "Wejście 10\nCzujnik zapełnienia WWT (zbiornik odpadów)",
+        "button10": "Wejście 11\nOpróżnienie mrozowe",
+        "button11": "Wejście 12\nCzujnik wycieków"
       },
       "sensors": {
-        "analog1": "Czujnik ciśnienia [mBar]",
-        "analog2": "nc (niepodłączony) [mA]"
+        "ad4": "Czujnik ciśnienia [mBar]",
+        "ad5": "n/c [mA]"
       },
       "errors": {
         "1": "Błąd zasilania - nieprawidłowe napięcie",
@@ -241,22 +241,22 @@
         "led11": "Output 12:\nFlush button green"
       },
       "inputs": {
-        "button1": "Bowl Sensor",
-        "button2": "Water Sensor",
-        "button3": "Pressure Switch",
-        "button4": "n/c",
-        "button5": "n/c",
-        "button6": "n/c",
-        "button7": "n/c",
-        "button8": "n/c",
-        "button9": "Flush Button",
-        "button10": "WWT full sensor (waste tank)",
-        "button11": "Freeze Drain",
-        "button12": "Leakege sensor"
+        "button0": "Input 1:\nBowl Sensor",
+        "button1": "Input 2:\nWater Sensor",
+        "button2": "Input 3:\nPressure Switch",
+        "button3": "Input 4:\nInlet Valve Position",
+        "button4": "Input 5:\nn/c",
+        "button5": "Input 6:\nn/c",
+        "button6": "Input 7:\nn/c",
+        "button7": "Input 8:\nn/c",
+        "button8": "Input 9:\nFlush Button",
+        "button9": "Input 10:\nWWT full sensor (waste tank)",
+        "button10": "Input 11:\nFreeze Drain",
+        "button11": "Input 12:\nLeakage sensor"
       },
       "sensors": {
-        "analog1": "Pressure sensor [mBar]",
-        "analog2": "nc (not connected) [mA]"
+        "ad4": "Pressure Sensor [mBar]",
+        "ad5": "n/c [mA]"
       },
       "errors": {
         "1": "Power error - incorrect voltage",
