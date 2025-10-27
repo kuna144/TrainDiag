@@ -35,19 +35,27 @@ class ControllerAPI {
       ...options.headers
     };
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), config.timeout);
+
     try {
       const response = await fetch(url, {
         ...options,
         headers,
-        timeout: config.timeout
+        signal: controller.signal
       });
 
+      clearTimeout(timeoutId);
+      console.log(`API Request: ${options.method || 'GET'} ${url} -> ${response.status}`);
+      
       if (!response.ok) {
-        throw new Error(`HTTP Error: ${response.status}`);
+        const errorText = await response.text();
+        console.error(`API Error Response: ${errorText}`);
       }
-
+      
       return response;
     } catch (error) {
+      clearTimeout(timeoutId);
       console.error('API Error:', error);
       throw error;
     }
@@ -55,42 +63,85 @@ class ControllerAPI {
 
   // Pobierz liczniki błędów
   async getErrorCounters() {
-    const response = await this.fetchWithAuth(config.endpoints.errorCounter);
-    const text = await response.text();
-    return this.parseXML(text);
+    try {
+      const response = await this.fetchWithAuth(config.endpoints.errorCounter);
+      if (!response.ok) {
+        throw new Error(`HTTP Error: ${response.status}`);
+      }
+      const text = await response.text();
+      return this.parseXML(text);
+    } catch (error) {
+      console.error('Błąd pobierania liczników błędów:', error);
+      throw error;
+    }
   }
 
   // Pobierz szczegóły licznika błędów
   async getErrorCounterDetail(counterId) {
-    const endpoint = config.endpoints.errorCounterDetail.replace('{id}', counterId);
-    const response = await this.fetchWithAuth(endpoint);
-    const text = await response.text();
-    return text;
+    try {
+      const endpoint = config.endpoints.errorCounterDetail.replace('{id}', counterId);
+      const response = await this.fetchWithAuth(endpoint);
+      if (!response.ok) {
+        throw new Error(`HTTP Error: ${response.status}`);
+      }
+      const text = await response.text();
+      return text;
+    } catch (error) {
+      console.error('Błąd pobierania szczegółów błędu:', error);
+      throw error;
+    }
   }
 
   // Pobierz stan wyjść
   async getOutputs() {
-    const response = await this.fetchWithAuth(config.endpoints.outputs);
-    const text = await response.text();
-    return this.parseOutputsXML(text);
+    try {
+      const response = await this.fetchWithAuth(config.endpoints.outputs);
+      const text = await response.text();
+      
+      if (response.status === 204) {
+        // No Content - zwróć domyślne wartości
+        return {
+          analog: [
+            { id: 'analog1', value: 0 },
+            { id: 'analog2', value: 0 }
+          ],
+          buttons: Array.from({length: 12}, (_, i) => ({ id: `button${i+1}`, on: false, marked: false })),
+          leds: Array.from({length: 12}, (_, i) => ({ id: `led${i+1}`, on: false, marked: false }))
+        };
+      }
+      
+      return this.parseOutputsXML(text);
+    } catch (error) {
+      console.error('Błąd pobierania wyjść:', error);
+      throw error;
+    }
   }
 
   // Sterowanie manualne
   async setOutput(outputId, state) {
-    const body = new URLSearchParams({
-      pg: 'led',
-      [outputId]: state ? 'on' : 'off'
-    });
+    try {
+      const body = new URLSearchParams({
+        pg: 'led',
+        [outputId]: state ? 'on' : 'off'
+      });
 
-    const response = await this.fetchWithAuth(config.endpoints.manualControl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      body: body.toString()
-    });
+      const response = await this.fetchWithAuth(config.endpoints.manualControl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: body.toString()
+      });
 
-    return response.ok;
+      if (!response.ok) {
+        throw new Error(`HTTP Error: ${response.status}`);
+      }
+
+      return response.ok;
+    } catch (error) {
+      console.error('Błąd sterowania wyjściem:', error);
+      throw error;
+    }
   }
 
   // Parsowanie XML z odpowiedzi

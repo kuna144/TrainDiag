@@ -12,6 +12,7 @@ import ScheduleIcon from '@mui/icons-material/Schedule';
 function ControlPanel({ language = 'pl', t = (key) => key }) {
   const [outputs, setOutputs] = useState({ 
     leds: [
+      { id: 'led0', on: false },
       { id: 'led1', on: false },
       { id: 'led2', on: false },
       { id: 'led3', on: false },
@@ -22,8 +23,7 @@ function ControlPanel({ language = 'pl', t = (key) => key }) {
       { id: 'led8', on: false },
       { id: 'led9', on: false },
       { id: 'led10', on: false },
-      { id: 'led11', on: false },
-      { id: 'led12', on: false }
+      { id: 'led11', on: false }
     ], 
     buttons: [
       { id: 'button1', on: false },
