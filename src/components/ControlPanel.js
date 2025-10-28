@@ -76,7 +76,7 @@ function ControlPanel({ language = 'pl', t = (key) => key }) {
 
     const interval = setInterval(() => {
       fetchData();
-    }, config.refreshInterval);
+    }, 10000); // Odświeżaj co 10 sekund
 
     return () => clearInterval(interval);
   }, [autoRefresh]);

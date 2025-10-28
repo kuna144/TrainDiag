@@ -28,7 +28,7 @@ class ControllerAPI {
     return `http://${this.settings.ipAddress}`;
   }
 
-  async fetchWithAuth(endpoint, options = {}) {
+  async fetchWithAuth(endpoint, options = {}, customTimeout = config.timeout) {
     const url = `${this.getBaseUrl()}${endpoint}`;
     const headers = {
       'Authorization': this.getAuthHeader(),
@@ -36,7 +36,7 @@ class ControllerAPI {
     };
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), config.timeout);
+    const timeoutId = setTimeout(() => controller.abort(), customTimeout);
 
     try {
       const response = await fetch(url, {
@@ -45,10 +45,10 @@ class ControllerAPI {
         signal: controller.signal
       });
 
-      clearTimeout(timeoutId);
       console.log(`API Request: ${options.method || 'GET'} ${url} -> ${response.status}`);
       
       if (!response.ok) {
+        clearTimeout(timeoutId);
         const errorText = await response.text();
         console.error(`API Error Response: ${errorText}`);
       }
@@ -58,22 +58,83 @@ class ControllerAPI {
       clearTimeout(timeoutId);
       console.error('API Error:', error);
       throw error;
+    } finally {
+      // NIE czyścimy timeoutu tutaj - zostanie wyczyszczony po pobraniu body
     }
   }
 
   // Pobierz liczniki błędów
   async getErrorCounters() {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    
     try {
-      const response = await this.fetchWithAuth(config.endpoints.errorCounter);
-      if (!response.ok) {
-        throw new Error(`HTTP Error: ${response.status}`);
-      }
+      const url = `${this.getBaseUrl()}${config.endpoints.errorCounter}`;
+      const response = await fetch(url, {
+        headers: {
+          'Authorization': this.getAuthHeader()
+        },
+        signal: controller.signal
+      });
+      
+      console.log(`API Request: GET ${url} -> ${response.status}`);
       const text = await response.text();
-      return this.parseXML(text);
+      clearTimeout(timeoutId);
+      
+      return this.parseErrorCountersXML(text);
     } catch (error) {
+      clearTimeout(timeoutId);
       console.error('Błąd pobierania liczników błędów:', error);
       throw error;
     }
+  }
+
+  // Parsowanie XML liczników błędów
+  parseErrorCountersXML(xmlString) {
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(xmlString, 'text/xml');
+    
+    const counters = [];
+    const texts = xmlDoc.getElementsByTagName('text');
+    
+    // Grupuj liczniki i ich wartości absolutne
+    const counterData = {};
+    for (let text of texts) {
+      const id = text.getElementsByTagName('id')[0]?.textContent;
+      const value = text.getElementsByTagName('value')[0]?.textContent;
+      
+      if (id && value) {
+        if (id.startsWith('counter') && !id.includes('absCounter')) {
+          const counterNum = id.replace('counter', '');
+          if (!counterData[counterNum]) {
+            counterData[counterNum] = {};
+          }
+          counterData[counterNum].id = id;
+          counterData[counterNum].value = parseInt(value);
+          counterData[counterNum].name = config.errorCounters[id] || `Counter ${counterNum}`;
+        } else if (id.startsWith('absCounter')) {
+          const counterNum = id.replace('absCounter', '');
+          if (!counterData[counterNum]) {
+            counterData[counterNum] = {};
+          }
+          counterData[counterNum].absValue = parseInt(value);
+        }
+      }
+    }
+    
+    // Konwertuj do tablicy
+    for (let num in counterData) {
+      if (counterData[num].id) {
+        counters.push({
+          id: counterData[num].id,
+          name: counterData[num].name,
+          value: counterData[num].value || 0,
+          absValue: counterData[num].absValue === 4294967295 ? -1 : counterData[num].absValue
+        });
+      }
+    }
+    
+    return counters;
   }
 
   // Pobierz szczegóły licznika błędów

@@ -9,24 +9,19 @@ import HistoryIcon from '@mui/icons-material/History';
 import ClearIcon from '@mui/icons-material/Clear';
 
 function ErrorList({ language = 'pl', t = (key) => key }) {
-  const [errors, setErrors] = useState([]);
-  const [errorHistory, setErrorHistory] = useState([]);
+  const [counters, setCounters] = useState([]);
   const [loading, setLoading] = useState(false);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [lastUpdate, setLastUpdate] = useState(null);
+  const [editValues, setEditValues] = useState({});
 
   const fetchErrors = async () => {
+    if (loading) return;
     setLoading(true);
     try {
-      const xmlDoc = await api.getErrorCounters();
-      const parsedErrors = parseErrorCounters(xmlDoc);
-      setErrors(parsedErrors);
+      const counterData = await api.getErrorCounters();
+      setCounters(counterData);
       setLastUpdate(new Date());
-      
-      // Zapisz do historii jeśli są nowe błędy
-      if (parsedErrors.length > 0) {
-        saveToHistory(parsedErrors);
-      }
     } catch (error) {
       console.error('Błąd pobierania błędów:', error);
     } finally {
@@ -34,62 +29,32 @@ function ErrorList({ language = 'pl', t = (key) => key }) {
     }
   };
 
-  const parseErrorCounters = (xmlDoc) => {
-    const errorElements = xmlDoc.getElementsByTagName('error');
-    const errorList = [];
-
-    for (let error of errorElements) {
-      const id = error.getElementsByTagName('id')[0]?.textContent;
-      const count = error.getElementsByTagName('count')[0]?.textContent;
-      const description = error.getElementsByTagName('description')[0]?.textContent;
-
-      if (id && parseInt(count) > 0) {
-        const description = config.supportedErrors[id] || description || `Błąd ${id}`;
-        errorList.push({
-          id,
-          count: parseInt(count),
-          description: description,
-          timestamp: new Date()
-        });
-      }
-    }
-
-    return errorList;
-  };
-
-  const saveToHistory = (newErrors) => {
-    const history = JSON.parse(localStorage.getItem('errorHistory') || '[]');
-    const updated = [...history, ...newErrors.map(e => ({
-      ...e,
-      timestamp: new Date().toISOString()
-    }))];
+  const handleSetCounter = async (counterId) => {
+    const newValue = editValues[counterId];
+    if (newValue === undefined || newValue === '') return;
     
-    // Zachowaj ostatnie 100 błędów
-    const trimmed = updated.slice(-100);
-    localStorage.setItem('errorHistory', JSON.stringify(trimmed));
-    setErrorHistory(trimmed.reverse());
-  };
-
-  const loadHistory = () => {
-    const history = JSON.parse(localStorage.getItem('errorHistory') || '[]');
-    setErrorHistory(history.reverse());
-  };
-
-  const clearHistory = () => {
-    localStorage.removeItem('errorHistory');
-    setErrorHistory([]);
-  };
-
-  const handleClearError = async (errorId) => {
-    // Tutaj dodaj endpoint do kasowania błędów gdy będzie dostępny
-    console.log('Kasowanie błędu:', errorId);
-    // Na razie tylko odświeżamy
+    console.log(`Ustawianie licznika ${counterId} na wartość ${newValue}`);
+    // TODO: Dodaj endpoint do ustawiania wartości licznika
+    // await api.setErrorCounter(counterId, newValue);
     fetchErrors();
+  };
+
+  const handleResetCounter = async (counterId) => {
+    console.log(`Resetowanie licznika ${counterId}`);
+    // TODO: Dodaj endpoint do resetowania licznika
+    // await api.resetErrorCounter(counterId);
+    fetchErrors();
+  };
+
+  const handleEditChange = (counterId, value) => {
+    setEditValues(prev => ({
+      ...prev,
+      [counterId]: value
+    }));
   };
 
   useEffect(() => {
     fetchErrors();
-    loadHistory();
   }, []);
 
   useEffect(() => {
@@ -97,7 +62,7 @@ function ErrorList({ language = 'pl', t = (key) => key }) {
 
     const interval = setInterval(() => {
       fetchErrors();
-    }, config.refreshInterval * 2); // Błędy odświeżaj rzadziej
+    }, 30000); // Błędy odświeżaj co 30 sekund
 
     return () => clearInterval(interval);
   }, [autoRefresh]);
@@ -129,53 +94,55 @@ function ErrorList({ language = 'pl', t = (key) => key }) {
       )}
 
       <div className="errors-section">
-        <h3><ErrorOutlineIcon sx={{ fontSize: 24, marginRight: 1 }} /> {t('activeErrors')} ({errors.length})</h3>
-        {errors.length === 0 ? (
-          <div className="no-errors">✓ {t('noActiveErrors')}</div>
+        <h3><ErrorOutlineIcon sx={{ fontSize: 24, marginRight: 1 }} /> Error Counters ({counters.length})</h3>
+        {counters.length === 0 ? (
+          <div className="no-errors">No counters available</div>
         ) : (
-          <div className="error-cards">
-            {errors.map((error) => (
-              <div key={error.id} className="error-card">
-                <div className="error-header">
-                  <span className="error-id">{t('errorId').replace('{id}', error.id)}</span>
-                  <span className="error-count">{t('occurrences').replace('{count}', error.count)}</span>
-                </div>
-                <div className="error-description">{error.description}</div>
-                <button 
-                  className="btn btn-clear"
-                  onClick={() => handleClearError(error.id)}
-                >
-                  {t('clearError')}
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      <div className="history-section">
-        <div className="history-header">
-          <h3><HistoryIcon sx={{ fontSize: 24, marginRight: 1 }} /> {t('errorHistory')} ({errorHistory.length})</h3>
-          <button className="btn btn-secondary" onClick={clearHistory}>
-            <ClearIcon sx={{ fontSize: 18, marginRight: 0.5 }} />
-            {t('clearHistory')}
-          </button>
-        </div>
-        {errorHistory.length === 0 ? (
-          <div className="no-data">{t('noErrorHistory')}</div>
-        ) : (
-          <div className="history-list">
-            {errorHistory.slice(0, 20).map((error, index) => (
-              <div key={index} className="history-item">
-                <span className="history-time">
-                  {new Date(error.timestamp).toLocaleString()}
-                </span>
-                <span className="history-error">
-                  {t('errorId').replace('{id}', error.id)} - {error.description}
-                </span>
-                <span className="history-count">×{error.count}</span>
-              </div>
-            ))}
+          <div className="counter-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Counter</th>
+                  <th>Value</th>
+                  <th>Absolute Value</th>
+                  <th>Set</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {counters.map((counter) => (
+                  <tr key={counter.id}>
+                    <td>{counter.name}</td>
+                    <td className="counter-value">{counter.value}</td>
+                    <td className="counter-abs-value">{counter.absValue}</td>
+                    <td>
+                      <input
+                        type="number"
+                        className="counter-input"
+                        placeholder="New value"
+                        value={editValues[counter.id] || ''}
+                        onChange={(e) => handleEditChange(counter.id, e.target.value)}
+                      />
+                    </td>
+                    <td className="counter-actions">
+                      <button 
+                        className="btn btn-set"
+                        onClick={() => handleSetCounter(counter.id)}
+                        disabled={!editValues[counter.id]}
+                      >
+                        Set
+                      </button>
+                      <button 
+                        className="btn btn-reset"
+                        onClick={() => handleResetCounter(counter.id)}
+                      >
+                        Reset
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </div>

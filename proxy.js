@@ -2,8 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
-
-const fetch = (...args) => import('node-fetch').then(module => module.default(...args));
+const axios = require('axios');
 
 const app = express();
 app.use(cors());
@@ -17,20 +16,22 @@ const CONTROLLER_URL = `http://${config.defaultSettings.controllerIp}`;
 
 console.log(`Proxy server running. Forwarding to: ${CONTROLLER_URL}`);
 
-app.use('/api', async (req, res) => {
+app.all('/api', async (req, res) => {
   const path = req.originalUrl.replace('/api', '');
   const url = `${CONTROLLER_URL}${path}`;
 
+  console.log(`Proxy: ${req.method} ${req.originalUrl} -> ${url}`);
+
   try {
-    const response = await fetch(url, {
+    const response = await axios(url, {
       method: req.method,
       headers: req.headers,
-      body: req.method !== 'GET' && req.method !== 'HEAD' ? JSON.stringify(req.body) : undefined,
-      timeout: 10000
+      data: req.method !== 'GET' && req.method !== 'HEAD' ? req.body : undefined,
+      timeout: 30000
     });
 
-    const data = await response.text();
-    res.status(response.status).send(data);
+    console.log(`Proxy response: ${response.status}`);
+    res.status(response.status).send(response.data);
   } catch (error) {
     console.error('Proxy error:', error.message);
     res.status(error.response?.status || 500).send(error.message);

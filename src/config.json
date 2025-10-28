@@ -1,6 +1,6 @@
 {
   "endpoints": {
-    "errorCounter": "/errorcounter.cgx",
+    "errorCounter": "/errorCounter.cgx",
     "errorCounterDetail": "/errorcounter.cgi?counter={id}",
     "outputs": "/out.cgx",
     "manualControl": "/manualControl.cgi",
@@ -17,7 +17,7 @@
     "firmwareVersion": "2.1.0"
   },
   "refreshInterval": 2000,
-  "timeout": 5000,
+  "timeout": 10000,
   "supportedErrors": {
     "1": "Błąd zasilania - nieprawidłowe napięcie",
     "2": "Błąd pompy próżniowej - brak odpowiedzi",
@@ -29,6 +29,26 @@
     "8": "Błąd pamięci EEPROM - błąd zapisu/odczytu",
     "9": "Błąd czujnika obecności - nieprawidłowe działanie",
     "10": "Błąd systemu alarmowego - awaria sygnalizacji"
+  },
+  "errorCounters": {
+    "counter0": "Startup",
+    "counter1": "User flush",
+    "counter2": "Flush cycles",
+    "counter3": "Pressure detected Routine",
+    "counter4": "Pressure detected Error",
+    "counter5": "No compressed Air Routine",
+    "counter6": "No compressed Air Error",
+    "counter7": "Ejector Blocked Routine",
+    "counter8": "Ejector Blocked Error",
+    "counter9": "Bowl Full Routine",
+    "counter10": "Bowl Full Error",
+    "counter11": "No Water Routine",
+    "counter12": "No Water Error",
+    "counter13": "Freeze Drain Routine",
+    "counter14": "Freeze Drain Completed",
+    "counter15": "WWT Full Flushes",
+    "counter16": "IMT Clean Counter",
+    "counter17": "IMT Clean Routine"
   },
   "supportedOutputs": {
         "led0": "Output 1:\nRising Valve",
