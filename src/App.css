@@ -885,6 +885,64 @@ body {
   gap: 20px;
 }
 
+/* New sensor grid for horizontal layout */
+.sensor-grid {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.sensor-item {
+  flex: 1;
+  min-width: 200px;
+  background: var(--card-background);
+  padding: 16px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-light);
+  border: 1px solid var(--divider);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sensor-item:hover {
+  box-shadow: var(--shadow-medium);
+  transform: translateY(-2px);
+  border-color: var(--primary-color);
+}
+
+.sensor-item .sensor-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: rgba(3, 169, 244, 0.1);
+  border-radius: var(--radius-sm);
+  color: var(--primary-color);
+}
+
+.sensor-item .sensor-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sensor-item .sensor-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.sensor-item .sensor-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
 .sensor-card {
   background: var(--card-background);
   padding: 16px;
@@ -1136,6 +1194,17 @@ body {
 
   .sensors-grid {
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  }
+
+  /* Responsive sensor grid */
+  .sensor-grid {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .sensor-item {
+    min-width: unset;
+    flex: none;
   }
 
   .button-group {
@@ -1401,8 +1470,8 @@ body {
 }
 
 .counter-input {
-  width: 100px;
-  padding: 6px 10px;
+  width: 120px;
+  padding: 8px 12px;
   border: 1px solid var(--divider);
   border-radius: var(--radius-sm);
   background: var(--background);
@@ -1453,4 +1522,128 @@ body {
 
 .btn-reset:hover {
   background: #f57c00;
+}
+
+/* Tab Navigation */
+.control-panel-wrapper {
+  width: 100%;
+}
+
+.tab-navigation {
+  display: flex;
+  background: var(--card-background);
+  border-bottom: 2px solid var(--divider);
+  margin-bottom: 0;
+}
+
+.tab-button {
+  flex: 1;
+  padding: 16px 24px;
+  background: var(--card-background);
+  border: none;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 3px solid transparent;
+}
+
+.tab-button:hover {
+  background: rgba(3, 169, 244, 0.05);
+  color: var(--text-primary);
+}
+
+.tab-button.active {
+  background: var(--card-background);
+  color: var(--primary-color);
+  border-bottom-color: var(--primary-color);
+  font-weight: 600;
+}
+
+.tab-content {
+  background: var(--card-background);
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  overflow: hidden;
+}
+
+/* Input Status Indicators */
+.input-item .status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.input-item .status-indicator.active {
+  background: rgba(67, 160, 71, 0.1);
+  color: var(--success);
+}
+
+.input-item .status-indicator.inactive {
+  background: rgba(158, 158, 158, 0.1);
+  color: var(--text-secondary);
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* Manual Control specific styles */
+.manual-control-container {
+  padding: 0;
+}
+
+.manual-control-container .control-header {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 16px 20px;
+  background: var(--card-background);
+  border-bottom: 1px solid var(--divider);
+}
+
+.manual-control-container .sensors-section,
+.manual-control-container .outputs-section {
+  padding: 20px;
+}
+
+.manual-control-container .sensors-section:not(:last-child) {
+  border-bottom: 1px solid var(--divider);
+}
+
+.manual-control-container h3 {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Inputs Tab specific styles */
+.inputs-tab-container {
+  padding: 0;
+}
+
+.inputs-tab-container .control-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: var(--card-background);
+  border-bottom: 1px solid var(--divider);
+}
+
+.inputs-tab-container .sensors-section,
+.inputs-tab-container .inputs-section {
+  padding: 20px;
+}
+
+.inputs-tab-container .sensors-section:not(:last-child) {
+  border-bottom: 1px solid var(--divider);
 }

@@ -33,17 +33,28 @@ function ErrorList({ language = 'pl', t = (key) => key }) {
     const newValue = editValues[counterId];
     if (newValue === undefined || newValue === '') return;
     
-    console.log(`Ustawianie licznika ${counterId} na wartość ${newValue}`);
-    // TODO: Dodaj endpoint do ustawiania wartości licznika
-    // await api.setErrorCounter(counterId, newValue);
-    fetchErrors();
+    try {
+      console.log(`Ustawianie licznika ${counterId} na wartość ${newValue}`);
+      await api.setErrorCounter(counterId, newValue);
+      fetchErrors();
+      // Wyczyść pole po udanym ustawieniu
+      setEditValues(prev => ({
+        ...prev,
+        [counterId]: ''
+      }));
+    } catch (error) {
+      console.error('Błąd ustawiania licznika:', error);
+    }
   };
 
   const handleResetCounter = async (counterId) => {
-    console.log(`Resetowanie licznika ${counterId}`);
-    // TODO: Dodaj endpoint do resetowania licznika
-    // await api.resetErrorCounter(counterId);
-    fetchErrors();
+    try {
+      console.log(`Resetowanie licznika ${counterId}`);
+      await api.resetErrorCounter(counterId);
+      fetchErrors();
+    } catch (error) {
+      console.error('Błąd resetowania licznika:', error);
+    }
   };
 
   const handleEditChange = (counterId, value) => {

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import Settings from './components/Settings';
-import ControlPanel from './components/ControlPanel';
+import ManualControl from './components/ManualControl';
+import InputsTab from './components/InputsTab';
 import ErrorList from './components/ErrorList';
 import SystemStatus from './components/SystemStatus';
 import api from './utils/api';
@@ -12,7 +13,6 @@ import MenuIcon from '@mui/icons-material/Menu';
 import SettingsIcon from '@mui/icons-material/Settings';
 import CloseIcon from '@mui/icons-material/Close';
 import RefreshIcon from '@mui/icons-material/Refresh';
-import DashboardIcon from '@mui/icons-material/Dashboard';
 import ErrorIcon from '@mui/icons-material/Error';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
@@ -22,9 +22,11 @@ import WifiOffIcon from '@mui/icons-material/WifiOff';
 import EngineeringIcon from '@mui/icons-material/Engineering';
 import MonitorIcon from '@mui/icons-material/Monitor';
 import PublicIcon from '@mui/icons-material/Public';
+import BuildIcon from '@mui/icons-material/Build';
+import InputIcon from '@mui/icons-material/Input';
 
 function App() {
-  const [activeTab, setActiveTab] = useState('control');
+  const [activeTab, setActiveTab] = useState('manual');
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState('unknown');
   const [isConnecting, setIsConnecting] = useState(false);
@@ -116,14 +118,16 @@ function App() {
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'control':
-        return <ControlPanel language={language} t={t} />;
+      case 'manual':
+        return <ManualControl language={language} t={t} />;
+      case 'inputs':
+        return <InputsTab language={language} t={t} />;
       case 'errors':
         return <ErrorList language={language} t={t} />;
       case 'system':
         return <SystemStatus language={language} t={t} />;
       default:
-        return <ControlPanel language={language} t={t} />;
+        return <ManualControl language={language} t={t} />;
     }
   };
 
@@ -208,11 +212,18 @@ function App() {
 
       <nav className="tab-navigation">
         <button 
-          className={`tab-btn ${activeTab === 'control' ? 'active' : ''}`}
-          onClick={() => setActiveTab('control')}
+          className={`tab-btn ${activeTab === 'manual' ? 'active' : ''}`}
+          onClick={() => setActiveTab('manual')}
         >
-          <DashboardIcon sx={{ fontSize: 20, marginRight: 1 }} />
-          {t('controlPanel')}
+          <BuildIcon sx={{ fontSize: 20, marginRight: 1 }} />
+          {t('manualControl')}
+        </button>
+        <button 
+          className={`tab-btn ${activeTab === 'inputs' ? 'active' : ''}`}
+          onClick={() => setActiveTab('inputs')}
+        >
+          <InputIcon sx={{ fontSize: 20, marginRight: 1 }} />
+          {t('inputsTab')}
         </button>
         <button 
           className={`tab-btn ${activeTab === 'errors' ? 'active' : ''}`}

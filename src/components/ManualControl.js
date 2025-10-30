@@ -4,37 +4,38 @@ import config from '../config.json';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import LightbulbIcon from '@mui/icons-material/Lightbulb';
 import PowerOffIcon from '@mui/icons-material/PowerOff';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
+import SensorsIcon from '@mui/icons-material/Sensors';
+import DeviceThermostatIcon from '@mui/icons-material/DeviceThermostat';
+import SpeedIcon from '@mui/icons-material/Speed';
 
 function ManualControl({ language = 'pl', t = (key) => key }) {
-  const [outputs, setOutputs] = useState({ leds: [], buttons: [] });
+  const [data, setData] = useState({ analog: [], digital: [] });
   const [loading, setLoading] = useState(false);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [lastUpdate, setLastUpdate] = useState(null);
 
-  const fetchOutputs = async () => {
+  const fetchData = async () => {
     setLoading(true);
     try {
-      const data = await api.getSensorData();
-      setOutputs({ leds: data.digital.filter(d => d.id.startsWith('led')), buttons: data.digital.filter(d => d.id.startsWith('button')) });
+      const sensorData = await api.getSensorData();
+      setData(sensorData);
       setLastUpdate(new Date());
     } catch (error) {
-      console.error('Błąd pobierania wyjść:', error);
+      console.error('Błąd pobierania danych:', error);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchOutputs();
+    fetchData();
   }, []);
 
   useEffect(() => {
     if (!autoRefresh) return;
 
     const interval = setInterval(() => {
-      fetchOutputs();
+      fetchData();
     }, config.refreshInterval);
 
     return () => clearInterval(interval);
@@ -42,20 +43,48 @@ function ManualControl({ language = 'pl', t = (key) => key }) {
 
   const handleToggleOutput = async (outputId, currentState) => {
     try {
+      // Obsługa Vacuum (output 3) - steruje jednocześnie output 2 i 3
+      if (outputId === 'led2') {
+        // Włącz/wyłącz Vacuum i Pressure razem
+        const newState = !currentState;
+        const stateStr = newState ? 'on' : 'off';
+        
+        const success = await api.setMultipleOutputs({
+          led1: stateStr,  // Pressure valve
+          led2: stateStr   // Vacuum valve
+        });
+        
+        if (success) {
+          setTimeout(fetchData, 300);
+        }
+        return;
+      }
+      
+      // Wszystkie inne wyjścia działają niezależnie
       const success = await api.setOutput(outputId, !currentState);
       if (success) {
-        // Odśwież stan po zmianie
-        setTimeout(fetchOutputs, 300);
+        setTimeout(fetchData, 300);
       }
     } catch (error) {
       console.error('Błąd sterowania wyjściem:', error);
     }
   };
 
+  const getIconForSensor = (sensorId) => {
+    if (sensorId.includes('temperature') || sensorId.includes('temp')) {
+      return <DeviceThermostatIcon className="icon" />;
+    } else if (sensorId.includes('pressure') || sensorId.includes('speed')) {
+      return <SpeedIcon className="icon" />;
+    }
+    return <SensorsIcon className="icon" />;
+  };
+
+  // Filtruj tylko wyjścia LED (nie inputs)
+  const ledOutputs = data.digital.filter(d => d.id.startsWith('led'));
+
   return (
     <div className="manual-control-container">
       <div className="control-header">
-        <h2>{t('manualControl')}</h2>
         <div className="control-actions">
           <label className="switch">
             <input
@@ -65,7 +94,7 @@ function ManualControl({ language = 'pl', t = (key) => key }) {
             />
             <span className="slider">{t('autoRefresh')}</span>
           </label>
-          <button className="btn btn-refresh" onClick={fetchOutputs} disabled={loading}>
+          <button className="btn btn-refresh" onClick={fetchData} disabled={loading}>
             <RefreshIcon className="icon" /> {t('refresh')}
           </button>
         </div>
@@ -77,10 +106,29 @@ function ManualControl({ language = 'pl', t = (key) => key }) {
         </div>
       )}
 
+      {/* Sensor Readings */}
+      <div className="sensors-section">
+        <h3>{t('sensorReadings')}</h3>
+        <div className="sensor-grid">
+          {data.analog.map((sensor) => (
+            <div key={sensor.id} className="sensor-item">
+              <div className="sensor-icon">
+                {getIconForSensor(sensor.id)}
+              </div>
+              <div className="sensor-info">
+                <span className="sensor-label">{sensor.description || sensor.id}</span>
+                <span className="sensor-value">{sensor.value} {sensor.unit}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Output Controls */}
       <div className="outputs-section">
-        <h3>{t('outputsLabel')}</h3>
+        <h3>{t('outputControl')}</h3>
         <div className="output-grid">
-          {outputs.leds.map((led) => (
+          {ledOutputs.map((led) => (
             <div key={led.id} className="output-item">
               <span className="output-label">{led.description || led.id.toUpperCase()}</span>
               <button
@@ -90,21 +138,6 @@ function ManualControl({ language = 'pl', t = (key) => key }) {
                 {led.on ? <LightbulbIcon className="icon" /> : <PowerOffIcon className="icon" />}
                 {led.on ? ` ${t('on')}` : ` ${t('off')}`}
               </button>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="outputs-section">
-        <h3>{t('inputsLabel')}</h3>
-        <div className="output-grid">
-          {outputs.buttons.map((button) => (
-            <div key={button.id} className="output-item readonly">
-              <span className="output-label">{button.description || button.id.toUpperCase()}</span>
-              <div className={`status-indicator ${button.on ? 'active' : ''}`}>
-                {button.on ? <CheckCircleIcon className="icon" /> : <RadioButtonUncheckedIcon className="icon" />}
-                {button.on ? ` ${t('active')}` : ` ${t('inactive')}`}
-              </div>
             </div>
           ))}
         </div>

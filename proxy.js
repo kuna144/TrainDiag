@@ -16,7 +16,7 @@ const CONTROLLER_URL = `http://${config.defaultSettings.controllerIp}`;
 
 console.log(`Proxy server running. Forwarding to: ${CONTROLLER_URL}`);
 
-app.all('/api', async (req, res) => {
+app.use('/api', async (req, res) => {
   const path = req.originalUrl.replace('/api', '');
   const url = `${CONTROLLER_URL}${path}`;
 

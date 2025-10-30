@@ -48,18 +48,18 @@ class ControllerAPI {
       console.log(`API Request: ${options.method || 'GET'} ${url} -> ${response.status}`);
       
       if (!response.ok) {
-        clearTimeout(timeoutId);
         const errorText = await response.text();
         console.error(`API Error Response: ${errorText}`);
+        clearTimeout(timeoutId);
+        throw new Error(`HTTP Error: ${response.status}`);
       }
       
+      clearTimeout(timeoutId);
       return response;
     } catch (error) {
       clearTimeout(timeoutId);
       console.error('API Error:', error);
       throw error;
-    } finally {
-      // NIE czyścimy timeoutu tutaj - zostanie wyczyszczony po pobraniu body
     }
   }
 
@@ -153,6 +153,41 @@ class ControllerAPI {
     }
   }
 
+  // Pobierz dane czujników (alias dla getOutputs z parsowaniem czujników)
+  async getSensorData() {
+    try {
+      const response = await this.fetchWithAuth(config.endpoints.outputs);
+      const text = await response.text();
+      
+      if (response.status === 204) {
+        // No Content - zwróć domyślne wartości
+        return {
+          analog: [
+            { id: 'ad4', value: 0, unit: 'mBar', description: 'Pressure sensor' },
+            { id: 'ad5', value: 0, unit: 'mA', description: 'nc(not connect)' }
+          ],
+          digital: [
+            ...Array.from({length: 12}, (_, i) => ({ 
+              id: `button${i}`, 
+              on: false, 
+              description: config.supportedInputs[`button${i}`] || `Input ${i+1}` 
+            })),
+            ...Array.from({length: 12}, (_, i) => ({ 
+              id: `led${i}`, 
+              on: false, 
+              description: config.supportedOutputs[`led${i}`] || `Output ${i+1}` 
+            }))
+          ]
+        };
+      }
+      
+      return this.parseSensorXML(text);
+    } catch (error) {
+      console.error('Błąd pobierania danych czujników:', error);
+      throw error;
+    }
+  }
+
   // Pobierz stan wyjść
   async getOutputs() {
     try {
@@ -201,6 +236,33 @@ class ControllerAPI {
       return response.ok;
     } catch (error) {
       console.error('Błąd sterowania wyjściem:', error);
+      throw error;
+    }
+  }
+
+  // Sterowanie wieloma wyjściami jednocześnie
+  async setMultipleOutputs(outputs) {
+    try {
+      const body = new URLSearchParams({
+        pg: 'led',
+        ...outputs
+      });
+
+      const response = await this.fetchWithAuth(config.endpoints.manualControl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: body.toString()
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP Error: ${response.status}`);
+      }
+
+      return response.ok;
+    } catch (error) {
+      console.error('Błąd sterowania wieloma wyjściami:', error);
       throw error;
     }
   }
@@ -269,15 +331,19 @@ class ControllerAPI {
     for (let text of texts) {
       const id = text.getElementsByTagName('id')[0]?.textContent;
       const value = text.getElementsByTagName('value')[0]?.textContent.trim();
-      const unit = text.getElementsByTagName('unit')[0]?.textContent || '';
       
-      if (id && value) {
-        const description = config.supportedSensors[id] || `Czujnik ${id}`;
+      if (id && value && config.supportedSensors[id]) {
+        const description = config.supportedSensors[id];
+        // Wyciągnij jednostkę z opisu
+        const unitMatch = description.match(/\[([^\]]+)\]/);
+        const unit = unitMatch ? unitMatch[1] : '';
+        const cleanDescription = description.replace(/\s*\[.*?\]/, '');
+        
         result.analog.push({ 
           id, 
           value: parseFloat(value), 
           unit,
-          description 
+          description: cleanDescription
         });
       }
     }
@@ -290,13 +356,15 @@ class ControllerAPI {
       
       if (id) {
         let description = '';
-        if (id.startsWith('button')) {
-          description = config.supportedInputs[id] || `Przycisk ${id}`;
-        } else if (id.startsWith('led')) {
-          description = config.supportedOutputs[id] || `LED ${id}`;
+        if (id.startsWith('button') && config.supportedInputs[id]) {
+          description = config.supportedInputs[id];
+        } else if (id.startsWith('led') && config.supportedOutputs[id]) {
+          description = config.supportedOutputs[id];
         }
         
-        result.digital.push({ id, on, description });
+        if (description) {
+          result.digital.push({ id, on, description });
+        }
       }
     }
 
@@ -310,6 +378,44 @@ class ControllerAPI {
       return { success: true, message: 'Połączenie OK' };
     } catch (error) {
       return { success: false, message: error.message };
+    }
+  }
+
+  // Ustaw wartość licznika błędów
+  async setErrorCounter(counterId, value) {
+    try {
+      const counterNum = counterId.replace('counter', '');
+      const endpoint = config.endpoints.errorCounterSet
+        .replace('{id}', counterNum)
+        .replace('{value}', value);
+      
+      const response = await this.fetchWithAuth(endpoint);
+      if (!response.ok) {
+        throw new Error(`HTTP Error: ${response.status}`);
+      }
+      return true;
+    } catch (error) {
+      console.error('Błąd ustawiania licznika:', error);
+      throw error;
+    }
+  }
+
+  // Resetuj licznik błędów
+  async resetErrorCounter(counterId) {
+    try {
+      const counterNum = counterId.replace('counter', '');
+      const endpoint = config.endpoints.errorCounterSet
+        .replace('{id}', counterNum)
+        .replace('{value}', '0');
+      
+      const response = await this.fetchWithAuth(endpoint);
+      if (!response.ok) {
+        throw new Error(`HTTP Error: ${response.status}`);
+      }
+      return true;
+    } catch (error) {
+      console.error('Błąd resetowania licznika:', error);
+      throw error;
     }
   }
 }
