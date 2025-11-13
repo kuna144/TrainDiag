@@ -12,12 +12,26 @@ function ErrorList({ language = 'pl', t = (key) => key, globalAutoRefresh = true
   const [counters, setCounters] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  // Get counter name from language-specific config
+  const getCounterName = (counterId) => {
+    const languageConfig = config.languages[language];
+    if (languageConfig && languageConfig.errorCounters && languageConfig.errorCounters[counterId]) {
+      return languageConfig.errorCounters[counterId];
+    }
+    return `Counter ${counterId}`;
+  };
+
   const fetchErrors = async () => {
     if (loading) return;
     setLoading(true);
     try {
       const counterData = await api.getErrorCounters();
-      setCounters(counterData);
+      // Update counter names with language-specific translations
+      const translatedCounters = counterData.map(counter => ({
+        ...counter,
+        name: getCounterName(counter.id)
+      }));
+      setCounters(translatedCounters);
     } catch (error) {
       console.error('Błąd pobierania błędów:', error);
     } finally {
@@ -37,7 +51,7 @@ function ErrorList({ language = 'pl', t = (key) => key, globalAutoRefresh = true
 
   useEffect(() => {
     fetchErrors();
-  }, []);
+  }, [language]); // Re-fetch when language changes
 
   useEffect(() => {
     if (!globalAutoRefresh) return;
@@ -47,48 +61,48 @@ function ErrorList({ language = 'pl', t = (key) => key, globalAutoRefresh = true
     }, 30000); // Błędy odświeżaj co 30 sekund
 
     return () => clearInterval(interval);
-  }, [globalAutoRefresh]);
+  }, [globalAutoRefresh, language]); // Add language dependency
 
   return (
-    <div className="error-list-container">
-      <div className="control-header">
-        <h2>{t('errorList')}</h2>
-      </div>
+    <div className="control-grid-container">
+      <div className="grid-section">
+        <div className="section-header">
+          <ErrorOutlineIcon className="section-icon" />
+          <span className="section-title">{t('errorList')}</span>
+          <span className="section-subtitle">({counters.length} {t('counters')})</span>
+        </div>
 
-      <div className="errors-section">
-        <h3><ErrorOutlineIcon sx={{ fontSize: 24, marginRight: 1 }} /> Error Counters ({counters.length})</h3>
         {counters.length === 0 ? (
-          <div className="no-errors">No counters available</div>
+          <div className="no-data-message">
+            <HistoryIcon className="no-data-icon" />
+            <span>{t('noCountersAvailable')}</span>
+          </div>
         ) : (
-          <div className="counter-table">
-            <table>
-              <thead>
-                <tr>
-                  <th>Counter</th>
-                  <th>Value</th>
-                  <th>Absolute Value</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {counters.map((counter) => (
-                  <tr key={counter.id}>
-                    <td>{counter.name}</td>
-                    <td className="counter-value">{counter.value}</td>
-                    <td className="counter-abs-value">{counter.absValue}</td>
-                    <td className="counter-actions">
-                      <button 
-                        className="btn btn-reset"
-                        onClick={() => handleResetCounter(counter.id)}
-                      >
-                        <ClearIcon sx={{ fontSize: 16, marginRight: 0.5 }} />
-                        Reset
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="error-counters-grid">
+            {counters.map((counter) => (
+              <div key={counter.id} className="counter-card">
+                <div className="counter-header">
+                  <span className="counter-name">{counter.name}</span>
+                  <button 
+                    className="btn-reset"
+                    onClick={() => handleResetCounter(counter.id)}
+                    title={t('resetCounter')}
+                  >
+                    <ClearIcon />
+                  </button>
+                </div>
+                <div className="counter-values">
+                  <div className="counter-value-item">
+                    <span className="counter-label">{t('currentValue')}</span>
+                    <span className="counter-value">{counter.value}</span>
+                  </div>
+                  <div className="counter-value-item">
+                    <span className="counter-label">{t('absoluteValue')}</span>
+                    <span className="counter-abs-value">{counter.absValue}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>
