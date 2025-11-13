@@ -7,7 +7,8 @@
     "manualControl": "/manualControl.cgi",
     "systemStatus": "/status.cgx",
     "sensorData": "/sensors.cgx",
-    "maintenance": "/maintenance.cgx"
+    "maintenance": "/maintenance.cgx",
+    "version": "/version.cgx"
   },
   "defaultSettings": {
     "ipAddress": "localhost:3001/api",

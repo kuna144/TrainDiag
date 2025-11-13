@@ -301,6 +301,27 @@ body {
   z-index: 1;
 }
 
+.version-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: 11px;
+  line-height: 1.2;
+  color: var(--text-secondary);
+  margin-right: 8px;
+}
+
+.version-line {
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .version-info {
+    display: none;
+  }
+}
+
 .status-indicator {
   width: 18px;
   height: 18px;

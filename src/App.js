@@ -30,6 +30,7 @@ function App() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState('unknown');
   const [isConnecting, setIsConnecting] = useState(false);
+  const [versionInfo, setVersionInfo] = useState(null);
   const [theme, setTheme] = useState(() => {
     const saved = localStorage.getItem('theme');
     return saved || 'auto';
@@ -41,6 +42,7 @@ function App() {
   const [languageDropdownOpen, setLanguageDropdownOpen] = useState(false);
 
   useEffect(() => {
+    console.log('=== useEffect - URUCHAMIANIE APLIKACJI ===');
     // Apply theme
     if (theme === 'auto') {
       document.documentElement.removeAttribute('data-theme');
@@ -51,6 +53,7 @@ function App() {
   }, [theme]);
 
   useEffect(() => {
+    console.log('=== useEffect - REJESTRACJA SW I TEST POŁĄCZENIA ===');
     // Rejestracja Service Workera
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/service-worker.js')
@@ -59,14 +62,40 @@ function App() {
     }
 
     // Test połączenia przy starcie
-    checkConnection();
+    console.log('Wywoływanie checkConnection przy starcie...');
+    setTimeout(() => {
+      checkConnection();
+    }, 100);
   }, []);
 
   const checkConnection = async () => {
+    console.log('=== ROZPOCZĘCIE checkConnection ===');
     setIsConnecting(true);
+    console.log('Testowanie połączenia...');
     const result = await api.testConnection();
+    console.log('Wynik testowania połączenia:', result);
     setConnectionStatus(result.success ? 'connected' : 'disconnected');
+    console.log('Ustawiono status połączenia na:', result.success ? 'connected' : 'disconnected');
+    
+    // Pobierz wersję tylko jeśli połączenie jest udane
+    if (result.success) {
+      try {
+        console.log('Połączenie udane, pobieranie wersji...');
+        const version = await api.getVersion();
+        console.log('Pobrana wersja:', version);
+        setVersionInfo(version);
+        console.log('Ustawiono versionInfo na:', version);
+      } catch (error) {
+        console.error('Nie udało się pobrać wersji:', error);
+        setVersionInfo(null);
+      }
+    } else {
+      console.log('Połączenie nieudane, nie pobieramy wersji');
+      setVersionInfo(null);
+    }
+    
     setIsConnecting(false);
+    console.log('=== KONIEC checkConnection ===');
   };
 
   const handleSettingsSaved = () => {
@@ -199,12 +228,21 @@ function App() {
           {t('appTitle')}
         </h1>
         <div className="connection-status">
+          {versionInfo && (
+            <div className="version-info">
+              <div className="version-line">{versionInfo.unicVersion}</div>
+              <div className="version-line">{versionInfo.systemVersion}</div>
+            </div>
+          )}
           {connectionStatus === 'connected' ? (
             <WifiIcon sx={{ fontSize: 20, color: getStatusColor() }} />
           ) : (
             <WifiOffIcon sx={{ fontSize: 20, color: getStatusColor() }} />
           )}
-          <button className="refresh-btn" onClick={checkConnection} disabled={isConnecting}>
+          <button className="refresh-btn" onClick={() => { 
+            console.log('KLIKNIĘTO PRZYCISK REFRESH!');
+            checkConnection();
+          }} disabled={isConnecting}>
             <RefreshIcon sx={{ fontSize: 20 }} />
           </button>
         </div>

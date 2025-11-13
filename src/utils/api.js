@@ -371,12 +371,60 @@ class ControllerAPI {
     return result;
   }
 
+  // Pobierz wersję oprogramowania
+  async getVersion() {
+    try {
+      console.log('Pobieranie wersji z endpointu:', config.endpoints.version);
+      const response = await this.fetchWithAuth(config.endpoints.version);
+      const text = await response.text();
+      console.log('Odpowiedź XML wersji:', text);
+      const parsed = this.parseVersionXML(text);
+      console.log('Sparsowana wersja:', parsed);
+      return parsed;
+    } catch (error) {
+      console.error('Błąd pobierania wersji:', error);
+      throw error;
+    }
+  }
+
+  // Parsowanie XML z wersją
+  parseVersionXML(xmlString) {
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(xmlString, 'text/xml');
+    
+    const result = {
+      unicVersion: '',
+      systemVersion: ''
+    };
+
+    const texts = xmlDoc.getElementsByTagName('text');
+    for (let text of texts) {
+      const id = text.getElementsByTagName('id')[0]?.textContent;
+      const value = text.getElementsByTagName('value')[0]?.textContent;
+      
+      if (id === 'versionUNIC' && value) {
+        // Wyciągnij wersję z formatu 'UNIC Version: "V1.1.0_Beta_10"'
+        const match = value.match(/"([^"]+)"/); 
+        result.unicVersion = match ? match[1] : value;
+      } else if (id === 'versionCustomer' && value) {
+        // Wyciągnij wersję z formatu 'System Version: "SVT V2.0"'
+        const match = value.match(/"([^"]+)"/); 
+        result.systemVersion = match ? match[1] : value;
+      }
+    }
+
+    return result;
+  }
+
   // Test połączenia
   async testConnection() {
     try {
-      await this.getOutputs();
+      console.log('Testowanie połączenia przez getSensorData...');
+      await this.getSensorData();
+      console.log('Test połączenia: SUKCES');
       return { success: true, message: 'Połączenie OK' };
     } catch (error) {
+      console.log('Test połączenia: BŁĄD', error.message);
       return { success: false, message: error.message };
     }
   }
