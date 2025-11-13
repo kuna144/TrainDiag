@@ -76,56 +76,61 @@ function InputsTab({ language = 'pl', t = (key) => key, globalAutoRefresh = true
 
   return (
     <div className="inputs-tab-container">
-
-      {/* Sensor Readings */}
-      <div className="sensors-section">
-        <h3>{t('sensorReadings')}</h3>
-        {data.analog && data.analog.length > 0 ? (
-          <div className="sensor-grid">
-            {data.analog.map((sensor) => (
-              <div key={sensor.id} className="sensor-item">
-                <div className="sensor-icon">
-                  {getIconForSensor(sensor.id)}
+      
+      {/* Combined Grid with all controls */}
+      <div className="control-grid-container">
+        
+        {/* Sensor Readings Section */}
+        <div className="grid-section sensors">
+          <h3 className="grid-section-title">{t('sensorReadings')}</h3>
+          {data.analog && data.analog.length > 0 ? (
+            <div className="grid-row sensor-row">
+              {data.analog.map((sensor) => (
+                <div key={sensor.id} className="sensor-item">
+                  <div className="sensor-icon">
+                    {getIconForSensor(sensor.id)}
+                  </div>
+                  <div className="sensor-info">
+                    <span className="sensor-label">{getSensorDisplayName(sensor.id)}</span>
+                    <span className="sensor-value">{sensor.value} {getSensorUnit(sensor.id)}</span>
+                  </div>
                 </div>
-                <div className="sensor-info">
-                  <span className="sensor-label">{getSensorDisplayName(sensor.id)}</span>
-                  <span className="sensor-value">{sensor.value} {getSensorUnit(sensor.id)}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="no-data">{t('noAnalogSensors')}</div>
-        )}
-      </div>
-
-      {/* Inputs Section */}
-      <div className="inputs-section">
-        <h3><InputIcon sx={{ fontSize: 24, marginRight: 1 }} /> {t('inputsSection')} ({data.buttons.filter(btn => btn.on).length}/{data.buttons.length})</h3>
-        <div className="control-grid">
-          {data.buttons.map((button) => {
-            const config_key = button.id;
-            const inputConfig = config.supportedInputs[config_key];
-            const translationKey = language === 'pl' ? 
-              config.languages.pl.inputs[config_key] : 
-              config.languages.en.inputs[config_key];
-            
-            const displayName = translationKey || inputConfig || `Input ${button.id}`;
-            
-            return (
-              <div key={button.id} className={`control-item input-item ${button.on ? 'active' : ''}`}>
-                <div className="item-info">
-                  <div className="item-id">{button.id.toUpperCase()}</div>
-                  <div className="item-description">{displayName}</div>
-                </div>
-                <div className={`status-indicator ${button.on ? 'active' : 'inactive'}`}>
-                  <span className="status-dot"></span>
-                  <span className="status-text">{button.on ? t('active') : t('inactive')}</span>
-                </div>
-              </div>
-            );
-          })}
+              ))}
+            </div>
+          ) : (
+            <div className="no-data">{t('noAnalogSensors')}</div>
+          )}
         </div>
+
+        {/* Inputs Section */}
+        <div className="grid-section inputs">
+          <h3 className="grid-section-title">
+            <InputIcon sx={{ fontSize: 24, marginRight: 1 }} /> 
+            {t('inputsSection')} ({data.buttons.filter(btn => btn.on).length}/{data.buttons.length})
+          </h3>
+          <div className="grid-rows input-rows">
+            {data.buttons.map((button) => {
+              const config_key = button.id;
+              const inputConfig = config.supportedInputs[config_key];
+              const translationKey = language === 'pl' ? 
+                config.languages.pl.inputs[config_key] : 
+                config.languages.en.inputs[config_key];
+              
+              const displayName = translationKey || inputConfig || `Input ${button.id}`;
+              
+              return (
+                <div key={button.id} className={`input-item ${button.on ? 'active' : ''}`}>
+                  <span className="input-label">{displayName}</span>
+                  <div className={`status-indicator-compact ${button.on ? 'active' : 'inactive'}`}>
+                    <span className="status-dot"></span>
+                    <span className="status-text">{button.on ? t('active') : t('inactive')}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        
       </div>
     </div>
   );
