@@ -8,7 +8,8 @@
     "systemStatus": "/status.cgx",
     "sensorData": "/sensors.cgx",
     "maintenance": "/maintenance.cgx",
-    "version": "/version.cgx"
+    "version": "/version.cgx",
+    "serviceFunctions": "/serviceFunctions.cgi?service={service}"
   },
   "defaultSettings": {
     "ipAddress": "localhost:3001/api",
@@ -148,6 +149,11 @@
       "autoMode": "Auto (systemowy)",
       "enableAutoRefresh": "Włącz auto-odświeżanie",
       "disableAutoRefresh": "Wyłącz auto-odświeżanie",
+      "serviceFunctions": "Funkcje Serwisowe",
+      "normalFlush": "Spłukiwanie Normalne",
+      "serviceFlush": "Spłukiwanie Serwisowe",
+      "freezeDrainStart": "START Opróżniania Mrożonego",
+      "freezeDrainStop": "STOP Opróżniania Mrożonego",
       "outputs": {
         "led0": "Wyjście 1:\nZawór podnoszący",
         "led1": "Wyjście 2:\nZawór ciśnieniowy",
@@ -256,6 +262,11 @@
       "autoMode": "Auto (system)",
       "enableAutoRefresh": "Enable auto-refresh",
       "disableAutoRefresh": "Disable auto-refresh",
+      "serviceFunctions": "Service Functions",
+      "normalFlush": "Normal Flush",
+      "serviceFlush": "Service Flush",
+      "freezeDrainStart": "START Freeze Drain",
+      "freezeDrainStop": "STOP Freeze Drain",
       "outputs": {
         "led0": "Output 1:\nRising Valve",
         "led1": "Output 2:\nPressure valve",

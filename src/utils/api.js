@@ -466,6 +466,20 @@ class ControllerAPI {
       throw error;
     }
   }
+
+  // Wywołaj funkcję serwisową
+  async callServiceFunction(service) {
+    try {
+      const endpoint = config.endpoints.serviceFunctions.replace('{service}', service);
+      const response = await this.fetchWithAuth(endpoint, { method: 'GET' });
+      
+      console.log(`Service Function Request: GET ${endpoint} (via proxy) -> ${response.status}`);
+      return response.ok;
+    } catch (error) {
+      console.error(`Błąd wywołania funkcji serwisowej ${service}:`, error);
+      return false;
+    }
+  }
 }
 
 export default new ControllerAPI();

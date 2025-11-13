@@ -7,6 +7,10 @@ import PowerOffIcon from '@mui/icons-material/PowerOff';
 import SensorsIcon from '@mui/icons-material/Sensors';
 import DeviceThermostatIcon from '@mui/icons-material/DeviceThermostat';
 import SpeedIcon from '@mui/icons-material/Speed';
+import WaterDropIcon from '@mui/icons-material/WaterDrop';
+import BuildIcon from '@mui/icons-material/Build';
+import AcUnitIcon from '@mui/icons-material/AcUnit';
+import StopIcon from '@mui/icons-material/Stop';
 
 function ManualControl({ language = 'pl', t = (key) => key, globalAutoRefresh = true }) {
   const [data, setData] = useState({ analog: [], digital: [] });
@@ -67,6 +71,22 @@ function ManualControl({ language = 'pl', t = (key) => key, globalAutoRefresh = 
     }
   };
 
+  const handleServiceFunction = async (service, functionName) => {
+    try {
+      console.log(`Wywołanie funkcji serwisowej: ${service}`);
+      const success = await api.callServiceFunction(service);
+      if (success) {
+        console.log(`Funkcja ${functionName} została wykonana pomyślnie`);
+        // Odśwież dane po wykonaniu funkcji serwisowej
+        setTimeout(fetchData, 500);
+      } else {
+        console.error(`Błąd wykonania funkcji ${functionName}`);
+      }
+    } catch (error) {
+      console.error(`Błąd wywołania funkcji serwisowej ${service}:`, error);
+    }
+  };
+
   const getIconForSensor = (sensorId) => {
     if (sensorId.includes('temperature') || sensorId.includes('temp')) {
       return <DeviceThermostatIcon className="icon" />;
@@ -81,6 +101,41 @@ function ManualControl({ language = 'pl', t = (key) => key, globalAutoRefresh = 
 
   return (
     <div className="manual-control-container">
+
+      {/* Service Functions */}
+      <div className="service-section">
+        <h3>{t('serviceFunctions')}</h3>
+        <div className="service-grid">
+          <button
+            className="btn-service normal-flush"
+            onClick={() => handleServiceFunction('normalFlush', t('normalFlush'))}
+          >
+            <WaterDropIcon className="icon" />
+            {t('normalFlush')}
+          </button>
+          <button
+            className="btn-service service-flush"
+            onClick={() => handleServiceFunction('serviceFlush', t('serviceFlush'))}
+          >
+            <BuildIcon className="icon" />
+            {t('serviceFlush')}
+          </button>
+          <button
+            className="btn-service freeze-drain-start"
+            onClick={() => handleServiceFunction('FreezeDrainG', t('freezeDrainStart'))}
+          >
+            <AcUnitIcon className="icon" />
+            {t('freezeDrainStart')}
+          </button>
+          <button
+            className="btn-service freeze-drain-stop"
+            onClick={() => handleServiceFunction('FreezeDrainS', t('freezeDrainStop'))}
+          >
+            <StopIcon className="icon" />
+            {t('freezeDrainStop')}
+          </button>
+        </div>
+      </div>
 
       {/* Sensor Readings */}
       <div className="sensors-section">

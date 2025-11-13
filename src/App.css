@@ -901,6 +901,83 @@ body {
   box-shadow: var(--shadow-inset);
 }
 
+/* Service Functions Section */
+.service-section {
+  margin-top: 24px;
+}
+
+.service-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.btn-service {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 60px;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-service::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s;
+}
+
+.btn-service:hover::before {
+  left: 100%;
+}
+
+.btn-service:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+}
+
+.btn-service:active {
+  transform: scale(0.98);
+  box-shadow: var(--shadow-inset);
+}
+
+.btn-service.normal-flush {
+  background: linear-gradient(135deg, #4caf50, #388e3c);
+}
+
+.btn-service.service-flush {
+  background: linear-gradient(135deg, #ff9800, #f57c00);
+}
+
+.btn-service.freeze-drain-start {
+  background: linear-gradient(135deg, #2196f3, #1976d2);
+}
+
+.btn-service.freeze-drain-stop {
+  background: linear-gradient(135deg, #f44336, #d32f2f);
+}
+
+.btn-service .icon {
+  font-size: 20px;
+}
+
 .output-item.readonly {
   opacity: 0.9;
   cursor: default;
