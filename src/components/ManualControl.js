@@ -8,18 +8,15 @@ import SensorsIcon from '@mui/icons-material/Sensors';
 import DeviceThermostatIcon from '@mui/icons-material/DeviceThermostat';
 import SpeedIcon from '@mui/icons-material/Speed';
 
-function ManualControl({ language = 'pl', t = (key) => key }) {
+function ManualControl({ language = 'pl', t = (key) => key, globalAutoRefresh = true }) {
   const [data, setData] = useState({ analog: [], digital: [] });
   const [loading, setLoading] = useState(false);
-  const [autoRefresh, setAutoRefresh] = useState(true);
-  const [lastUpdate, setLastUpdate] = useState(null);
 
   const fetchData = async () => {
     setLoading(true);
     try {
       const sensorData = await api.getSensorData();
       setData(sensorData);
-      setLastUpdate(new Date());
     } catch (error) {
       console.error('Błąd pobierania danych:', error);
     } finally {
@@ -32,14 +29,14 @@ function ManualControl({ language = 'pl', t = (key) => key }) {
   }, []);
 
   useEffect(() => {
-    if (!autoRefresh) return;
+    if (!globalAutoRefresh) return;
 
     const interval = setInterval(() => {
       fetchData();
     }, config.refreshInterval);
 
     return () => clearInterval(interval);
-  }, [autoRefresh]);
+  }, [globalAutoRefresh]);
 
   const handleToggleOutput = async (outputId, currentState) => {
     try {
@@ -84,27 +81,6 @@ function ManualControl({ language = 'pl', t = (key) => key }) {
 
   return (
     <div className="manual-control-container">
-      <div className="control-header">
-        <div className="control-actions">
-          <label className="switch">
-            <input
-              type="checkbox"
-              checked={autoRefresh}
-              onChange={(e) => setAutoRefresh(e.target.checked)}
-            />
-            <span className="slider">{t('autoRefresh')}</span>
-          </label>
-          <button className="btn btn-refresh" onClick={fetchData} disabled={loading}>
-            <RefreshIcon className="icon" /> {t('refresh')}
-          </button>
-        </div>
-      </div>
-
-      {lastUpdate && (
-        <div className="last-update">
-          {t('lastUpdate')}: {lastUpdate.toLocaleTimeString()}
-        </div>
-      )}
 
       {/* Sensor Readings */}
       <div className="sensors-section">

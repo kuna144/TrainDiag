@@ -4,7 +4,6 @@ import Settings from './components/Settings';
 import ManualControl from './components/ManualControl';
 import InputsTab from './components/InputsTab';
 import ErrorList from './components/ErrorList';
-import SystemStatus from './components/SystemStatus';
 import api from './utils/api';
 import config from './config.json';
 
@@ -20,10 +19,10 @@ import SettingsBrightnessIcon from '@mui/icons-material/SettingsBrightness';
 import WifiIcon from '@mui/icons-material/Wifi';
 import WifiOffIcon from '@mui/icons-material/WifiOff';
 import EngineeringIcon from '@mui/icons-material/Engineering';
-import MonitorIcon from '@mui/icons-material/Monitor';
 import PublicIcon from '@mui/icons-material/Public';
 import BuildIcon from '@mui/icons-material/Build';
 import InputIcon from '@mui/icons-material/Input';
+import AutorenewIcon from '@mui/icons-material/Autorenew';
 
 function App() {
   const [activeTab, setActiveTab] = useState('manual');
@@ -40,6 +39,10 @@ function App() {
     return saved || 'pl';
   });
   const [languageDropdownOpen, setLanguageDropdownOpen] = useState(false);
+  const [globalAutoRefresh, setGlobalAutoRefresh] = useState(() => {
+    const saved = localStorage.getItem('globalAutoRefresh');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
 
   useEffect(() => {
     console.log('=== useEffect - URUCHAMIANIE APLIKACJI ===');
@@ -51,6 +54,10 @@ function App() {
     }
     localStorage.setItem('theme', theme);
   }, [theme]);
+
+  useEffect(() => {
+    localStorage.setItem('globalAutoRefresh', JSON.stringify(globalAutoRefresh));
+  }, [globalAutoRefresh]);
 
   useEffect(() => {
     console.log('=== useEffect - REJESTRACJA SW I TEST POŁĄCZENIA ===');
@@ -148,15 +155,13 @@ function App() {
   const renderContent = () => {
     switch (activeTab) {
       case 'manual':
-        return <ManualControl language={language} t={t} />;
+        return <ManualControl language={language} t={t} globalAutoRefresh={globalAutoRefresh} />;
       case 'inputs':
-        return <InputsTab language={language} t={t} />;
+        return <InputsTab language={language} t={t} globalAutoRefresh={globalAutoRefresh} />;
       case 'errors':
-        return <ErrorList language={language} t={t} />;
-      case 'system':
-        return <SystemStatus language={language} t={t} />;
+        return <ErrorList language={language} t={t} globalAutoRefresh={globalAutoRefresh} />;
       default:
-        return <ManualControl language={language} t={t} />;
+        return <ManualControl language={language} t={t} globalAutoRefresh={globalAutoRefresh} />;
     }
   };
 
@@ -239,6 +244,13 @@ function App() {
           ) : (
             <WifiOffIcon sx={{ fontSize: 20, color: getStatusColor() }} />
           )}
+          <button 
+            className={`auto-refresh-btn ${globalAutoRefresh ? 'active' : ''}`} 
+            onClick={() => setGlobalAutoRefresh(!globalAutoRefresh)}
+            title={globalAutoRefresh ? t('disableAutoRefresh') : t('enableAutoRefresh')}
+          >
+            <AutorenewIcon sx={{ fontSize: 20 }} />
+          </button>
           <button className="refresh-btn" onClick={() => { 
             console.log('KLIKNIĘTO PRZYCISK REFRESH!');
             checkConnection();
@@ -269,13 +281,6 @@ function App() {
         >
           <ErrorIcon sx={{ fontSize: 20, marginRight: 1 }} />
           {t('errorList')}
-        </button>
-        <button 
-          className={`tab-btn ${activeTab === 'system' ? 'active' : ''}`}
-          onClick={() => setActiveTab('system')}
-        >
-          <MonitorIcon sx={{ fontSize: 20, marginRight: 1 }} />
-          {t('systemStatus')}
         </button>
       </nav>
 

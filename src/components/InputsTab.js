@@ -11,7 +11,7 @@ import SpeedIcon from '@mui/icons-material/Speed';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 
-function InputsTab({ language = 'pl', t = (key) => key }) {
+function InputsTab({ language = 'pl', t = (key) => key, globalAutoRefresh = true }) {
   const [data, setData] = useState({
     buttons: Array.from({length: 12}, (_, i) => ({ id: `button${i}`, on: false, marked: false })),
     analog: [
@@ -20,15 +20,12 @@ function InputsTab({ language = 'pl', t = (key) => key }) {
     ]
   });
   const [loading, setLoading] = useState(false);
-  const [autoRefresh, setAutoRefresh] = useState(true);
-  const [lastUpdate, setLastUpdate] = useState(null);
 
   const fetchData = async () => {
     setLoading(true);
     try {
       const data = await api.getOutputs();
       setData(data);
-      setLastUpdate(new Date());
     } catch (error) {
       console.error('Błąd pobierania danych:', error);
     } finally {
@@ -41,14 +38,14 @@ function InputsTab({ language = 'pl', t = (key) => key }) {
   }, []);
 
   useEffect(() => {
-    if (!autoRefresh) return;
+    if (!globalAutoRefresh) return;
 
     const interval = setInterval(() => {
       fetchData();
     }, 10000);
 
     return () => clearInterval(interval);
-  }, [autoRefresh]);
+  }, [globalAutoRefresh]);
 
   const getSensorDisplayName = (sensorId) => {
     const supportedSensor = config.supportedSensors[sensorId];
@@ -79,27 +76,6 @@ function InputsTab({ language = 'pl', t = (key) => key }) {
 
   return (
     <div className="inputs-tab-container">
-      <div className="control-header">
-        <div className="control-actions">
-          <label className="switch">
-            <input
-              type="checkbox"
-              checked={autoRefresh}
-              onChange={(e) => setAutoRefresh(e.target.checked)}
-            />
-            <span className="slider">{t('autoRefresh')}</span>
-          </label>
-          <button className="btn btn-refresh" onClick={fetchData} disabled={loading}>
-            <RefreshIcon className="icon" /> {t('refresh')}
-          </button>
-        </div>
-      </div>
-
-      {lastUpdate && (
-        <div className="last-update">
-          {t('lastUpdate')}: {lastUpdate.toLocaleTimeString()}
-        </div>
-      )}
 
       {/* Sensor Readings */}
       <div className="sensors-section">

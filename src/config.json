@@ -146,6 +146,8 @@
       "lightMode": "Tryb jasny",
       "darkMode": "Tryb ciemny",
       "autoMode": "Auto (systemowy)",
+      "enableAutoRefresh": "Włącz auto-odświeżanie",
+      "disableAutoRefresh": "Wyłącz auto-odświeżanie",
       "outputs": {
         "led0": "Wyjście 1:\nZawór podnoszący",
         "led1": "Wyjście 2:\nZawór ciśnieniowy",
@@ -252,6 +254,8 @@
       "lightMode": "Light mode",
       "darkMode": "Dark mode",
       "autoMode": "Auto (system)",
+      "enableAutoRefresh": "Enable auto-refresh",
+      "disableAutoRefresh": "Disable auto-refresh",
       "outputs": {
         "led0": "Output 1:\nRising Valve",
         "led1": "Output 2:\nPressure valve",
