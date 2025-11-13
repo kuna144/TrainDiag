@@ -102,76 +102,81 @@ function ManualControl({ language = 'pl', t = (key) => key, globalAutoRefresh = 
   return (
     <div className="manual-control-container">
 
-      {/* Service Functions */}
-      <div className="service-section">
-        <h3>{t('serviceFunctions')}</h3>
-        <div className="service-grid">
-          <button
-            className="btn-service normal-flush"
-            onClick={() => handleServiceFunction('normalFlush', t('normalFlush'))}
-          >
-            <WaterDropIcon className="icon" />
-            {t('normalFlush')}
-          </button>
-          <button
-            className="btn-service service-flush"
-            onClick={() => handleServiceFunction('serviceFlush', t('serviceFlush'))}
-          >
-            <BuildIcon className="icon" />
-            {t('serviceFlush')}
-          </button>
-          <button
-            className="btn-service freeze-drain-start"
-            onClick={() => handleServiceFunction('FreezeDrainG', t('freezeDrainStart'))}
-          >
-            <AcUnitIcon className="icon" />
-            {t('freezeDrainStart')}
-          </button>
-          <button
-            className="btn-service freeze-drain-stop"
-            onClick={() => handleServiceFunction('FreezeDrainS', t('freezeDrainStop'))}
-          >
-            <StopIcon className="icon" />
-            {t('freezeDrainStop')}
-          </button>
+      {/* Combined Grid with all controls */}
+      <div className="control-grid-container">
+        
+        {/* Service Functions Row */}
+        <div className="grid-section service-functions">
+          <h3 className="grid-section-title">{t('serviceFunctions')}</h3>
+          <div className="grid-row service-row">
+            <button
+              className="btn-service normal-flush"
+              onClick={() => handleServiceFunction('normalFlush', t('normalFlush'))}
+            >
+              <WaterDropIcon className="icon" />
+              {t('normalFlush')}
+            </button>
+            <button
+              className="btn-service service-flush"
+              onClick={() => handleServiceFunction('serviceFlush', t('serviceFlush'))}
+            >
+              <BuildIcon className="icon" />
+              {t('serviceFlush')}
+            </button>
+            <button
+              className="btn-service freeze-drain-start"
+              onClick={() => handleServiceFunction('FreezeDrainG', t('freezeDrainStart'))}
+            >
+              <AcUnitIcon className="icon" />
+              {t('freezeDrainStart')}
+            </button>
+            <button
+              className="btn-service freeze-drain-stop"
+              onClick={() => handleServiceFunction('FreezeDrainS', t('freezeDrainStop'))}
+            >
+              <StopIcon className="icon" />
+              {t('freezeDrainStop')}
+            </button>
+          </div>
         </div>
-      </div>
 
-      {/* Sensor Readings */}
-      <div className="sensors-section">
-        <h3>{t('sensorReadings')}</h3>
-        <div className="sensor-grid">
-          {data.analog.map((sensor) => (
-            <div key={sensor.id} className="sensor-item">
-              <div className="sensor-icon">
-                {getIconForSensor(sensor.id)}
+        {/* Sensor Readings Row */}
+        <div className="grid-section sensors">
+          <h3 className="grid-section-title">{t('sensorReadings')}</h3>
+          <div className="grid-row sensor-row">
+            {data.analog.map((sensor) => (
+              <div key={sensor.id} className="sensor-item">
+                <div className="sensor-icon">
+                  {getIconForSensor(sensor.id)}
+                </div>
+                <div className="sensor-info">
+                  <span className="sensor-label">{sensor.description || sensor.id}</span>
+                  <span className="sensor-value">{sensor.value} {sensor.unit}</span>
+                </div>
               </div>
-              <div className="sensor-info">
-                <span className="sensor-label">{sensor.description || sensor.id}</span>
-                <span className="sensor-value">{sensor.value} {sensor.unit}</span>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
 
-      {/* Output Controls */}
-      <div className="outputs-section">
-        <h3>{t('outputControl')}</h3>
-        <div className="output-grid">
-          {ledOutputs.map((led) => (
-            <div key={led.id} className="output-item">
-              <span className="output-label">{led.description || led.id.toUpperCase()}</span>
-              <button
-                className={`btn-output ${led.on ? 'active' : ''}`}
-                onClick={() => handleToggleOutput(led.id, led.on)}
-              >
-                {led.on ? <LightbulbIcon className="icon" /> : <PowerOffIcon className="icon" />}
-                {led.on ? ` ${t('on')}` : ` ${t('off')}`}
-              </button>
-            </div>
-          ))}
+        {/* Output Controls Rows */}
+        <div className="grid-section outputs">
+          <h3 className="grid-section-title">{t('outputControl')}</h3>
+          <div className="grid-rows output-rows">
+            {ledOutputs.map((led) => (
+              <div key={led.id} className="output-item">
+                <span className="output-label">{led.description || led.id.toUpperCase()}</span>
+                <button
+                  className={`btn-output ${led.on ? 'active' : ''}`}
+                  onClick={() => handleToggleOutput(led.id, led.on)}
+                >
+                  {led.on ? <LightbulbIcon className="icon" /> : <PowerOffIcon className="icon" />}
+                  {led.on ? ` ${t('on')}` : ` ${t('off')}`}
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
+        
       </div>
     </div>
   );
