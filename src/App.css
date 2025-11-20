@@ -911,65 +911,53 @@ body {
 }
 
 .output-item {
-  background: var(--card-background);
-  padding: 24px;
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-light);
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  border: 1px solid var(--divider);
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-  min-height: 90px;
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
+  display: contents;
+  gap: 0;
+  border: none;
+  transition: none;
+  position: static;
+  overflow: visible;
+  min-height: unset;
 }
 
 .output-item::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
-  opacity: 0;
-  transition: opacity 0.3s ease;
+  content: none;
 }
 
 .output-item:hover {
-  box-shadow: var(--shadow-medium);
-  transform: translateY(-4px);
+  box-shadow: none;
+  transform: none;
 }
 
 .output-item:hover::before {
-  opacity: 1;
+  opacity: 0;
 }
 
 .output-label {
-  font-weight: 600;
-  color: var(--text-secondary);
-  font-size: 16px;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
+  display: none;
 }
 
 .btn-output {
   width: 100%;
-  padding: 18px;
+  padding: 14px 16px;
   border: none;
   border-radius: var(--radius-md);
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  min-height: 60px;
+  min-height: 56px;
   position: relative;
   overflow: hidden;
   display: flex;
   align-items: center;
-  justify-content: center;
-  text-align: center;
+  justify-content: flex-start;
+  text-align: left;
+  gap: 10px;
 }
 
 .btn-output::before {
@@ -1008,6 +996,18 @@ body {
 .btn-output:active {
   transform: scale(0.96);
   box-shadow: var(--shadow-inset);
+}
+
+.btn-output.output-full {
+  font-weight: 600;
+  text-transform: none;
+}
+
+.btn-output-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
 }
 
 /* Combined Grid Layout */

@@ -145,19 +145,23 @@ function ManualControl({ language = 'pl', t = (key) => key, globalAutoRefresh = 
         {/* Output Controls Rows */}
         <div className="grid-section outputs">
           <h3 className="grid-section-title">{t('outputControl')}</h3>
-          <div className="grid-rows output-rows">
-            {ledOutputs.map((led) => (
-              <div key={led.id} className="output-item">
-                <span className="output-label">{led.description || led.id.toUpperCase()}</span>
+          <div className="grid-rows output-rows compact">
+            {ledOutputs.map((led, idx) => {
+              const rawLabel = led.description || led.id.toUpperCase();
+              const cleaned = rawLabel.replace(/^(?:Output|Wyjście|LED|Led)\s*\d+\s*:?-?\s*/i, '').trim() || rawLabel;
+              const stateText = led.on ? t('on') : t('off');
+              return (
                 <button
-                  className={`btn-output ${led.on ? 'active' : ''}`}
+                  key={led.id}
+                  className={`btn-output output-full ${led.on ? 'active' : ''}`}
                   onClick={() => handleToggleOutput(led.id, led.on)}
+                  title={rawLabel}
                 >
                   {led.on ? <LightbulbIcon className="icon" /> : <PowerOffIcon className="icon" />}
-                  {led.on ? ` ${t('on')}` : ` ${t('off')}`}
+                  <span className="btn-output-text">{`${idx + 1}: ${cleaned} - ${stateText}`}</span>
                 </button>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
         
