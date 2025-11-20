@@ -25,6 +25,8 @@ import InputIcon from '@mui/icons-material/Input';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
 import FullscreenIcon from '@mui/icons-material/Fullscreen';
 import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
+import DeviceThermostatIcon from '@mui/icons-material/DeviceThermostat';
+import SpeedIcon from '@mui/icons-material/Speed';
 
 function App() {
   const [activeTab, setActiveTab] = useState('manual');
@@ -45,6 +47,9 @@ function App() {
     const saved = localStorage.getItem('globalAutoRefresh');
     return saved !== null ? JSON.parse(saved) : true;
   });
+  // Header sensor readings state
+  const [headerSensors, setHeaderSensors] = useState([]);
+  const [headerSensorsLoading, setHeaderSensorsLoading] = useState(false);
 
   useEffect(() => {
     console.log('=== useEffect - URUCHAMIANIE APLIKACJI ===');
@@ -107,6 +112,31 @@ function App() {
     console.log('=== KONIEC checkConnection ===');
   };
 
+  // Fetch sensors for header
+  const fetchHeaderSensors = async () => {
+    setHeaderSensorsLoading(true);
+    try {
+      const data = await api.getSensorData();
+      setHeaderSensors(data.analog || []);
+    } catch (e) {
+      console.warn('Header sensors fetch failed:', e.message);
+    } finally {
+      setHeaderSensorsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchHeaderSensors();
+  }, []);
+
+  useEffect(() => {
+    if (!globalAutoRefresh) return;
+    const interval = setInterval(() => {
+      fetchHeaderSensors();
+    }, config.refreshInterval);
+    return () => clearInterval(interval);
+  }, [globalAutoRefresh]);
+
   const handleSettingsSaved = () => {
     checkConnection();
     setSettingsOpen(false);
@@ -146,6 +176,18 @@ function App() {
     if (theme === 'light') return <LightModeIcon sx={{ fontSize: 24 }} />;
     if (theme === 'dark') return <DarkModeIcon sx={{ fontSize: 24 }} />;
     return <SettingsBrightnessIcon sx={{ fontSize: 24 }} />;
+  };
+
+  const getIconForSensor = (sensorId, description = '') => {
+    const idLower = sensorId.toLowerCase();
+    const descLower = (description || '').toLowerCase();
+    if (idLower.includes('temp') || descLower.includes('temp')) {
+      return <DeviceThermostatIcon sx={{ fontSize: 18 }} />;
+    }
+    if (idLower.includes('press') || idLower.includes('speed') || sensorId === 'ad4' || descLower.includes('press')) {
+      return <SpeedIcon sx={{ fontSize: 18 }} />;
+    }
+    return <SpeedIcon sx={{ fontSize: 18 }} />;
   };
 
   const getThemeLabel = () => {
@@ -274,10 +316,28 @@ function App() {
       )}
 
       <header className="app-header">
-        <button className="hamburger-btn" onClick={() => setSettingsOpen(true)}>
-          <MenuIcon sx={{ fontSize: 24 }} />
-        </button>
-        <h1>
+        <div className="left-header">
+          <button className="hamburger-btn" onClick={() => setSettingsOpen(true)}>
+            <MenuIcon sx={{ fontSize: 24 }} />
+          </button>
+          <div className="header-sensors">
+            {headerSensorsLoading && headerSensors.length === 0 && (
+              <div className="header-sensor loading">…</div>
+            )}
+            {headerSensors.map(sensor => (
+              <div key={sensor.id} className="header-sensor">
+                <div className="icon-wrap">
+                  {getIconForSensor(sensor.id, sensor.description)}
+                </div>
+                <div className="sensor-text">
+                  <span className="name">{sensor.description || sensor.id}</span>
+                  <span className="value">{sensor.value} {sensor.unit}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <h1 className="center-title">
           <EngineeringIcon sx={{ fontSize: 32, marginRight: 1 }} />
           {t('appTitle')}
         </h1>

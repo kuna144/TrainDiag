@@ -140,23 +140,7 @@ function ManualControl({ language = 'pl', t = (key) => key, globalAutoRefresh = 
           </div>
         </div>
 
-        {/* Sensor Readings Row */}
-        <div className="grid-section sensors">
-          <h3 className="grid-section-title">{t('sensorReadings')}</h3>
-          <div className="grid-row sensor-row">
-            {data.analog.map((sensor) => (
-              <div key={sensor.id} className="sensor-item">
-                <div className="sensor-icon">
-                  {getIconForSensor(sensor.id)}
-                </div>
-                <div className="sensor-info">
-                  <span className="sensor-label">{sensor.description || sensor.id}</span>
-                  <span className="sensor-value">{sensor.value} {sensor.unit}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        {/* Sensor readings moved to header */}
 
         {/* Output Controls Rows */}
         <div className="grid-section outputs">

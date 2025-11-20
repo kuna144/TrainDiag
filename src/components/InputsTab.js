@@ -104,27 +104,7 @@ function InputsTab({ language = 'pl', t = (key) => key, globalAutoRefresh = true
       {/* Combined Grid with all controls */}
       <div className="control-grid-container">
         
-        {/* Sensor Readings Section */}
-        <div className="grid-section sensors">
-          <h3 className="grid-section-title">{t('sensorReadings')}</h3>
-          {data.analog && data.analog.length > 0 ? (
-            <div className="grid-row sensor-row">
-              {data.analog.map((sensor) => (
-                <div key={sensor.id} className="sensor-item">
-                  <div className="sensor-icon">
-                    {getIconForSensor(sensor.id)}
-                  </div>
-                  <div className="sensor-info">
-                    <span className="sensor-label">{getSensorDisplayName(sensor.id)}</span>
-                    <span className="sensor-value">{sensor.value} {getSensorUnit(sensor.id)}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="no-data">{t('noAnalogSensors')}</div>
-          )}
-        </div>
+        {/* Sensor readings przeniesione do paska tytułowego */}
 
         {/* Inputs Section */}
         <div className="grid-section inputs">
