@@ -1,9 +1,15 @@
 {
   "name": "TrainDiag - Diagnostyka Toalet Próżniowych",
   "short_name": "TrainDiag",
+  "lang": "pl-PL",
   "description": "Aplikacja diagnostyczna do sterowników toalet próżniowych",
   "start_url": "/",
-  "display": "standalone",
+  "scope": "/",
+  "display_override": [
+    "fullscreen",
+    "standalone"
+  ],
+  "display": "fullscreen",
   "background_color": "#fafafa",
   "theme_color": "#03a9f4",
   "orientation": "portrait",
@@ -19,6 +25,20 @@
       "sizes": "512x512",
       "type": "image/svg+xml",
       "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Sterowanie ręczne",
+      "short_name": "Sterowanie",
+      "url": "/?tab=manual",
+      "icons": [
+        {
+          "src": "/icon-192.svg",
+          "sizes": "192x192",
+          "type": "image/svg+xml"
+        }
+      ]
     }
   ]
 }

@@ -23,6 +23,8 @@ import PublicIcon from '@mui/icons-material/Public';
 import BuildIcon from '@mui/icons-material/Build';
 import InputIcon from '@mui/icons-material/Input';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
+import FullscreenIcon from '@mui/icons-material/Fullscreen';
+import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
 
 function App() {
   const [activeTab, setActiveTab] = useState('manual');
@@ -170,6 +172,53 @@ function App() {
     return connectionStatus === 'connected' ? '#43a047' : '#e53935';
   };
 
+  // Fullscreen helpers
+  const [isFullscreen, setIsFullscreen] = useState(() => !!document.fullscreenElement || window.matchMedia('(display-mode: fullscreen)').matches);
+
+  const updateFullscreenState = () => {
+    const fs = !!document.fullscreenElement || window.matchMedia('(display-mode: fullscreen)').matches;
+    setIsFullscreen(fs);
+  };
+
+  useEffect(() => {
+    const handler = () => updateFullscreenState();
+    document.addEventListener('fullscreenchange', handler);
+    return () => document.removeEventListener('fullscreenchange', handler);
+  }, []);
+
+  useEffect(() => {
+    // Auto enter fullscreen if URL has ?fullscreen=1 or local preference
+    const params = new URLSearchParams(window.location.search);
+    const autoFs = params.get('fullscreen') === '1' || localStorage.getItem('prefFullscreen') === 'true';
+    if (autoFs && !isFullscreen) {
+      requestFullscreen();
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const requestFullscreen = async () => {
+    try {
+      await document.documentElement.requestFullscreen();
+      localStorage.setItem('prefFullscreen', 'true');
+    } catch (e) {
+      console.warn('Fullscreen request failed:', e);
+    }
+  };
+
+  const exitFullscreen = async () => {
+    try {
+      if (document.fullscreenElement) {
+        await document.exitFullscreen();
+      }
+      localStorage.setItem('prefFullscreen', 'false');
+    } catch (e) {
+      console.warn('Exit fullscreen failed:', e);
+    }
+  };
+
+  const toggleFullscreen = () => {
+    if (isFullscreen) exitFullscreen(); else requestFullscreen();
+  };
+
   return (
     <div className="app">
       {/* Side Drawer for Settings */}
@@ -250,6 +299,13 @@ function App() {
             title={globalAutoRefresh ? t('disableAutoRefresh') : t('enableAutoRefresh')}
           >
             <AutorenewIcon sx={{ fontSize: 20 }} />
+          </button>
+          <button
+            className={`fullscreen-btn ${isFullscreen ? 'active' : ''}`}
+            onClick={toggleFullscreen}
+            title={isFullscreen ? t('exitFullscreen') : t('enterFullscreen')}
+          >
+            {isFullscreen ? <FullscreenExitIcon sx={{ fontSize: 20 }} /> : <FullscreenIcon sx={{ fontSize: 20 }} />}
           </button>
           <button className="refresh-btn" onClick={() => { 
             console.log('KLIKNIĘTO PRZYCISK REFRESH!');

@@ -12,7 +12,7 @@
     "serviceFunctions": "/serviceFunctions.cgi?service={service}"
   },
   "defaultSettings": {
-    "ipAddress": "localhost:3001/api",
+    "ipAddress": "localhost:3000/api",
     "controllerIp": "192.168.0.100",
     "username": "guest",
     "password": "guest",
@@ -42,36 +42,36 @@
     "counter17": "counter17"
   },
   "supportedOutputs": {
-        "led0": "Output 1:\nRising Valve",
-        "led1": "Output 2:\nPressure valve",
-        "led2": "Output 3:\nVacuum valve",
-        "led3": "Output 4:\nOutlet Valve",
-        "led4": "Output 5:\nInlet Valve",
-        "led5": "Output 6:\nWater inlet valve",
-        "led6": "Output 7:\nCleaning nozzle IMT",
-        "led7": "Output 8:\nRising nozzle valve",
-        "led8": "Output 9:\nOut of order",
-        "led9": "Output 10:\nFlush button red",
-        "led10": "Output 11:\nFreeze drain complete",
-        "led11": "Output 12:\nFlush button green"
+        "led0": "Wyjście 1:\nSpłukiwanie",
+        "led1": "Wyjście 2:\nCiśnienie",
+        "led2": "Wyjście 3:\nPodciśnienie",
+        "led3": "Wyjście 4:\nZawór wylotowy",
+        "led4": "Wyjście 5:\nZawór wlotowy",
+        "led5": "Wyjście 6:\nZawór wlotu wody",
+        "led6": "Wyjście 7:\nDysza czyszcząca IMT",
+        "led7": "Wyjście 8:\nZawór dyszy podnoszącej",
+        "led8": "Wyjście 9:\nNieczynne",
+        "led9": "Wyjście 10:\nPrzycisk spłukiwania czerwony",
+        "led10": "Wyjście 11:\nOpróżnianie mrozowe zakończone",
+        "led11": "Wyjście 12:\nPrzycisk spłukiwania zielony"
   },
   "supportedInputs": {
-    "button0": "Input 1:\nBowl Sensor",
-    "button1": "Input 2:\nWater Sensor",
-    "button2": "Input 3:\nPressure Switch",
-    "button3": "Input 4:\nInlet Valve Position",
-    "button4": "Input 5:\nn/c",
-    "button5": "Input 6:\nn/c",
-    "button6": "Input 7:\nn/c",
-    "button7": "Input 8:\nn/c",
-    "button8": "Input 9:\nFlush Button",
-    "button9": "Input 10:\nWWT full sensor (waste tank)",
-    "button10": "Input 11:\nFreeze Drain",
-    "button11": "Input 12:\nLeakege sensor"
+    "button0": "Wejście 1:\nCzujnik misy",
+    "button1": "Wejście 2:\nCzujnik wody",
+    "button2": "Wejście 3:\nPrzełącznik ciśnienia",
+    "button3": "Wejście 4:\nPozycja zaworu wlotowego",
+    "button4": "Wejście 5:\nn/c",
+    "button5": "Wejście 6:\nn/c",
+    "button6": "Wejście 7:\nn/c",
+    "button7": "Wejście 8:\nn/c",
+    "button8": "Wejście 9:\nPrzycisk spłukiwania",
+    "button9": "Wejście 10:\nCzujnik zapełnienia WWT (zbiornik odpadów)",
+    "button10": "Wejście 11:\nOpróżnienie mrozowe",
+    "button11": "Wejście 12:\nCzujnik wycieków"
   },
   "supportedSensors": {
-    "ad4": "Pressure sensor [mBar]",
-    "ad5": "nc(not connect) [mA]"
+    "ad4": "Czujnik ciśnienia [mBar]",
+    "ad5": "n/c [mA]"
   },
   "languages": {
     "pl": {
@@ -142,6 +142,8 @@
       "serviceFlush": "Spłukiwanie Serwisowe",
       "freezeDrainStart": "START Opróżniania Mrożonego",
       "freezeDrainStop": "STOP Opróżniania Mrożonego",
+      "enterFullscreen": "Pełny ekran",
+      "exitFullscreen": "Wyjdź z pełnego ekranu",
       "countersList": "Lista Liczników",
       "counterName": "Nazwa Licznika",
       "currentValue": "Wartość Bieżąca",
@@ -182,9 +184,9 @@
         "counter17": "Procedura czyszczenia IMT"
       },
       "outputs": {
-        "led0": "Wyjście 1:\nZawór podnoszący",
-        "led1": "Wyjście 2:\nZawór ciśnieniowy",
-        "led2": "Wyjście 3:\nZawór próżniowy",
+        "led0": "Wyjście 1:\nSpłukiwanie",
+        "led1": "Wyjście 2:\nCiśnienie",
+        "led2": "Wyjście 3:\nPodciśnienie",
         "led3": "Wyjście 4:\nZawór wylotowy",
         "led4": "Wyjście 5:\nZawór wlotowy",
         "led5": "Wyjście 6:\nZawór wlotu wody",
@@ -294,6 +296,8 @@
       "serviceFlush": "Service Flush",
       "freezeDrainStart": "START Freeze Drain",
       "freezeDrainStop": "STOP Freeze Drain",
+      "enterFullscreen": "Enter Fullscreen",
+      "exitFullscreen": "Exit Fullscreen",
       "countersList": "Counters List",
       "counterName": "Counter Name",
       "currentValue": "Current Value",
@@ -335,8 +339,8 @@
       },
       "outputs": {
         "led0": "Output 1:\nRising Valve",
-        "led1": "Output 2:\nPressure valve",
-        "led2": "Output 3:\nVacuum valve",
+        "led1": "Output 2:\nPressure",
+        "led2": "Output 3:\nVacuum",
         "led3": "Output 4:\nOutlet Valve",
         "led4": "Output 5:\nInlet Valve",
         "led5": "Output 6:\nWater inlet valve",

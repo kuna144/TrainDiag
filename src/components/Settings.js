@@ -11,8 +11,13 @@ function Settings({ onSettingsSaved, language = 'pl', t = (key) => key }) {
     setSettings({ ...settings, [field]: value });
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    // Save normal settings
     api.saveSettings(settings);
+    // Update controller IP on server (integrated server variant)
+    if (settings.controllerIp) {
+      await api.updateControllerIp(settings.controllerIp);
+    }
     setTestResult({ success: true, message: 'Ustawienia zapisane!' });
     if (onSettingsSaved) onSettingsSaved();
     setTimeout(() => setTestResult(null), 3000);
@@ -47,11 +52,11 @@ function Settings({ onSettingsSaved, language = 'pl', t = (key) => key }) {
       <h2>{t('connectionSettings')}</h2>
       
       <div className="form-group">
-        <label>{t('ipAddress')}:</label>
+        <label>{t('ipAddress')} (Controller IP):</label>
         <input
           type="text"
-          value={settings.ipAddress}
-          onChange={(e) => handleChange('ipAddress', e.target.value)}
+          value={settings.controllerIp || ''}
+          onChange={(e) => handleChange('controllerIp', e.target.value)}
           placeholder="192.168.0.100"
           className="touch-input"
         />
@@ -103,7 +108,8 @@ function Settings({ onSettingsSaved, language = 'pl', t = (key) => key }) {
 
       <div className="info-section">
         <h3>{t('connectionSettings')}</h3>
-        <p>{t('defaultIp')}: {config.defaultSettings.ipAddress}</p>
+        <p>{t('defaultIp')}: {config.defaultSettings.controllerIp}</p>
+        <p>Proxy Base (auto): {window.location.origin}/api</p>
         <p>{t('deviceType')}: {config.defaultSettings.deviceType}</p>
         <p>{t('firmwareVersion')}: {config.defaultSettings.firmwareVersion}</p>
         <p>{t('refreshInterval')}: {config.refreshInterval}ms</p>

@@ -13,9 +13,59 @@ class ControllerAPI {
     return config.defaultSettings;
   }
 
+  // Get translation based on current language
+  getTranslation(key, section = '') {
+    const language = localStorage.getItem('language') || 'pl';
+    
+    if (section) {
+      // For outputs, inputs, sensors etc.
+      const translations = config.languages[language]?.[section];
+      if (translations && translations[key]) {
+        return translations[key];
+      }
+      // Fallback to global config
+      const globalSection = section === 'outputs' ? 'supportedOutputs' : 
+                           section === 'inputs' ? 'supportedInputs' :
+                           section === 'sensors' ? 'supportedSensors' : null;
+      if (globalSection && config[globalSection] && config[globalSection][key]) {
+        return config[globalSection][key];
+      }
+    } else {
+      // For regular translations
+      const translations = config.languages[language];
+      if (translations && translations[key]) {
+        return translations[key];
+      }
+    }
+    
+    return key; // Return key as fallback
+  }
+
   saveSettings(settings) {
     localStorage.setItem('controllerSettings', JSON.stringify(settings));
     this.settings = settings;
+  }
+
+  async updateControllerIp(ip) {
+    // Persist locally
+    this.settings.controllerIp = ip;
+    localStorage.setItem('controllerSettings', JSON.stringify(this.settings));
+    // Try server endpoint (integrated server variant)
+    try {
+      const response = await fetch('/setControllerIp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ controllerIp: ip })
+      });
+      if (!response.ok) {
+        console.warn('Controller IP update endpoint responded with status', response.status);
+      } else {
+        const data = await response.json();
+        console.log('Controller IP updated on server:', data);
+      }
+    } catch (e) {
+      console.warn('Controller IP update failed (likely using standalone proxy.js):', e.message);
+    }
   }
 
   getAuthHeader() {
@@ -25,7 +75,12 @@ class ControllerAPI {
   }
 
   getBaseUrl() {
-    return `http://${this.settings.ipAddress}`;
+    // ipAddress used previously for proxy address; derive automatically
+    // If running integrated server, base = current origin; else fallback to stored ipAddress
+    if (window.location.port === '3000') {
+      return `${window.location.origin}/api`;
+    }
+    return `http://${this.settings.ipAddress || 'localhost:3000/api'}`;
   }
 
   async fetchWithAuth(endpoint, options = {}, customTimeout = config.timeout) {
@@ -163,8 +218,8 @@ class ControllerAPI {
         // No Content - zwróć domyślne wartości
         return {
           analog: [
-            { id: 'ad4', value: 0, unit: 'mBar', description: 'Pressure sensor' },
-            { id: 'ad5', value: 0, unit: 'mA', description: 'nc(not connect)' }
+            { id: 'ad4', value: 0, unit: 'mBar', description: this.getTranslation('ad4', 'sensors') || 'Pressure sensor' },
+            { id: 'ad5', value: 0, unit: 'mA', description: this.getTranslation('ad5', 'sensors') || 'nc(not connect)' }
           ],
           digital: [
             ...Array.from({length: 12}, (_, i) => ({ 
@@ -175,7 +230,7 @@ class ControllerAPI {
             ...Array.from({length: 12}, (_, i) => ({ 
               id: `led${i}`, 
               on: false, 
-              description: config.supportedOutputs[`led${i}`] || `Output ${i+1}` 
+              description: this.getTranslation(`led${i}`, 'outputs') || `Output ${i+1}` 
             }))
           ]
         };
@@ -305,9 +360,9 @@ class ControllerAPI {
       
       if (id) {
         console.log('Checkbox:', id, on, marked);
-        if (id.startsWith('button') && config.supportedInputs[id]) {
+        if (id.startsWith('button')) {
           result.buttons.push({ id, on, marked });
-        } else if (id.startsWith('led') && config.supportedOutputs[id]) {
+        } else if (id.startsWith('led')) {
           result.leds.push({ id, on, marked });
         }
       }
@@ -332,8 +387,8 @@ class ControllerAPI {
       const id = text.getElementsByTagName('id')[0]?.textContent;
       const value = text.getElementsByTagName('value')[0]?.textContent.trim();
       
-      if (id && value && config.supportedSensors[id]) {
-        const description = config.supportedSensors[id];
+      if (id && value && (config.supportedSensors[id] || this.getTranslation(id, 'sensors'))) {
+        const description = this.getTranslation(id, 'sensors') || config.supportedSensors[id];
         // Wyciągnij jednostkę z opisu
         const unitMatch = description.match(/\[([^\]]+)\]/);
         const unit = unitMatch ? unitMatch[1] : '';
@@ -356,13 +411,13 @@ class ControllerAPI {
       
       if (id) {
         let description = '';
-        if (id.startsWith('button') && config.supportedInputs[id]) {
-          description = config.supportedInputs[id];
-        } else if (id.startsWith('led') && config.supportedOutputs[id]) {
-          description = config.supportedOutputs[id];
+        if (id.startsWith('button')) {
+          description = this.getTranslation(id, 'inputs');
+        } else if (id.startsWith('led')) {
+          description = this.getTranslation(id, 'outputs');
         }
         
-        if (description) {
+        if (description && description !== id) {
           result.digital.push({ id, on, description });
         }
       }

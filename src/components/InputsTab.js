@@ -48,20 +48,44 @@ function InputsTab({ language = 'pl', t = (key) => key, globalAutoRefresh = true
   }, [globalAutoRefresh]);
 
   const getSensorDisplayName = (sensorId) => {
+    const language = localStorage.getItem('language') || 'pl';
+    const translations = config.languages[language]?.sensors;
+    
+    if (translations && translations[sensorId]) {
+      // Extract just the name part (before [unit])
+      const fullDescription = translations[sensorId];
+      const match = fullDescription.match(/^(.+?)\s*\[/);
+      return match ? match[1] : fullDescription;
+    }
+    
+    // Fallback to global config
     const supportedSensor = config.supportedSensors[sensorId];
     if (supportedSensor) {
-      if (sensorId === 'ad4') return 'Analog IN1';
-      if (sensorId === 'ad5') return 'Analog IN2';
+      const match = supportedSensor.match(/^(.+?)\s*\[/);
+      return match ? match[1] : supportedSensor;
     }
+    
     return `Sensor ${sensorId}`;
   };
 
   const getSensorUnit = (sensorId) => {
+    const language = localStorage.getItem('language') || 'pl';
+    const translations = config.languages[language]?.sensors;
+    
+    if (translations && translations[sensorId]) {
+      // Extract unit from [unit] part
+      const fullDescription = translations[sensorId];
+      const match = fullDescription.match(/\[([^\]]+)\]/);
+      return match ? match[1] : '';
+    }
+    
+    // Fallback to global config
     const supportedSensor = config.supportedSensors[sensorId];
     if (supportedSensor) {
-      if (sensorId === 'ad4') return 'mBar';
-      if (sensorId === 'ad5') return 'mA';
+      const match = supportedSensor.match(/\[([^\]]+)\]/);
+      return match ? match[1] : '';
     }
+    
     return '';
   };
 

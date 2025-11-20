@@ -7,7 +7,9 @@
     "start": "webpack serve --mode development --open",
     "build": "webpack --mode production",
     "dev": "webpack --mode development --watch",
-    "proxy": "node proxy.js"
+    "proxy": "node proxy.js",
+    "serve": "npm run build && node server.js",
+    "server": "node server.js"
   },
   "keywords": [
     "pwa",
