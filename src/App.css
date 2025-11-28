@@ -943,14 +943,14 @@ body {
 
 .btn-output {
   width: 100%;
-  padding: 14px 16px;
+  padding: 18px 20px;
   border: none;
   border-radius: var(--radius-md);
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  min-height: 56px;
+  min-height: 130px;
   position: relative;
   overflow: hidden;
   display: flex;
@@ -1117,7 +1117,7 @@ body {
   gap: 6px;
   padding: 8px 12px;
   border-radius: var(--radius-sm);
-  font-size: 12px;
+  font-size: 18px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -1184,8 +1184,8 @@ body {
   color: white;
   border: none;
   border-radius: var(--radius-md);
-  padding: 16px 20px;
-  font-size: 14px;
+  padding: 18px 22px;
+  font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -1194,7 +1194,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  min-height: 60px;
+  min-height: 130px;
   position: relative;
   overflow: hidden;
 }
@@ -1404,8 +1404,8 @@ body {
 /* Error List Grid Layout */
 .error-counters-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
   padding: 4px;
 }
 
@@ -1413,11 +1413,15 @@ body {
   background: var(--card-background);
   border: 1px solid var(--divider);
   border-radius: var(--radius-lg);
-  padding: 20px;
+  padding: 16px;
   box-shadow: var(--shadow-light);
   transition: all 0.2s ease;
   position: relative;
   overflow: hidden;
+  display: grid;
+  grid-template-columns: 1fr 92px;
+  gap: 12px;
+  align-items: stretch;
 }
 
 .counter-card::before {
@@ -1435,81 +1439,149 @@ body {
   transform: translateY(-2px);
 }
 
-.counter-header {
+.counter-left {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.counter-right {
+  display: flex;
+  align-items: stretch;
 }
 
 .counter-name {
   font-weight: 600;
-  font-size: 14px;
+  font-size: 16px;
   color: var(--text-primary);
-  line-height: 1.4;
+  line-height: 1.3;
   flex: 1;
-  margin-right: 12px;
+  margin-right: 8px;
+  display: flex;
+  align-items: center;
 }
 
 .counter-values {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.counter-values.vertical {
+  grid-template-columns: 1fr;
 }
 
 .counter-value-item {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 12px;
+  flex-direction: column;
+  padding: 8px 10px;
   background: rgba(3, 169, 244, 0.05);
   border-radius: var(--radius-sm);
-  border-left: 3px solid var(--primary-color);
+  border: 1px solid var(--divider);
+  align-items: center;
 }
 
 .counter-label {
-  font-size: 12px;
-  color: var(--text-secondary);
-  font-weight: 500;
+  display: none;
 }
 
 .counter-value {
-  font-weight: 600;
-  font-size: 16px;
+  font-weight: 700;
+  font-size: 18px;
   color: var(--primary-color);
 }
 
 .counter-abs-value {
-  font-weight: 500;
-  font-size: 14px;
+  font-weight: 700;
+  font-size: 18px;
   color: var(--text-secondary);
 }
 
 .btn-reset {
   background: rgba(244, 67, 54, 0.1);
   color: var(--error);
-  border: 1px solid rgba(244, 67, 54, 0.2);
-  border-radius: var(--radius-sm);
-  padding: 12px 16px;
+  border: 1px solid rgba(244, 67, 54, 0.3);
+  border-radius: var(--radius-md);
+  padding: 12px 18px;
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
   min-width: 48px;
-  height: 48px;
-  font-size: 14px;
-  font-weight: 500;
+  height: 56px;
+  font-size: 16px;
+  font-weight: 700;
+}
+.btn-reset.full {
+  width: 100%;
+  height: auto;
 }
 
 .btn-reset:hover {
   background: rgba(244, 67, 54, 0.15);
-  border-color: rgba(244, 67, 54, 0.3);
+  border-color: rgba(244, 67, 54, 0.35);
   transform: scale(1.05);
 }
 
 .btn-reset svg {
-  font-size: 20px;
+  font-size: 22px;
+}
+
+/* Error list header alignment */
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.section-header .section-icon {
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.section-header .section-title {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+}
+.section-header .section-subtitle {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-left: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.counter-legend {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  color: var(--text-secondary);
+}
+
+.legend-item .legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--primary-color);
+}
+
+.legend-item.absolute .legend-dot {
+  background: var(--text-secondary);
 }
 
 /* Error List Responsive Design */
@@ -1521,10 +1593,11 @@ body {
 
   .counter-card {
     padding: 16px;
+    grid-template-columns: 1fr 80px;
   }
 
   .counter-name {
-    font-size: 13px;
+    font-size: 15px;
   }
 
   .counter-value-item {
@@ -1544,13 +1617,14 @@ body {
   }
 
   .btn-reset {
-    min-width: 44px;
-    height: 44px;
-    padding: 10px 14px;
+    min-width: 48px;
+    height: 52px;
+    padding: 12px 16px;
+    font-size: 15px;
   }
 
   .btn-reset svg {
-    font-size: 18px;
+    font-size: 20px;
   }
 }
 
@@ -1930,7 +2004,7 @@ body {
   gap: 8px;
   padding: 8px 12px;
   border-radius: var(--radius-sm);
-  font-size: 13px;
+  font-size: 18px;
   font-weight: 500;
 }
 

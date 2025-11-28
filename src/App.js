@@ -23,8 +23,8 @@ import PublicIcon from '@mui/icons-material/Public';
 import BuildIcon from '@mui/icons-material/Build';
 import InputIcon from '@mui/icons-material/Input';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
-import FullscreenIcon from '@mui/icons-material/Fullscreen';
-import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
+import FullscreenRoundedIcon from '@mui/icons-material/FullscreenRounded';
+import FullscreenExitRoundedIcon from '@mui/icons-material/FullscreenExitRounded';
 import DeviceThermostatIcon from '@mui/icons-material/DeviceThermostat';
 import SpeedIcon from '@mui/icons-material/Speed';
 
@@ -365,7 +365,7 @@ function App() {
             onClick={toggleFullscreen}
             title={isFullscreen ? t('exitFullscreen') : t('enterFullscreen')}
           >
-            {isFullscreen ? <FullscreenExitIcon sx={{ fontSize: 20 }} /> : <FullscreenIcon sx={{ fontSize: 20 }} />}
+            {isFullscreen ? <FullscreenExitRoundedIcon sx={{ fontSize: 22 }} /> : <FullscreenRoundedIcon sx={{ fontSize: 22 }} />}
           </button>
           <button className="refresh-btn" onClick={() => { 
             console.log('KLIKNIĘTO PRZYCISK REFRESH!');

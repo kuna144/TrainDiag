@@ -27,10 +27,27 @@ function ErrorList({ language = 'pl', t = (key) => key, globalAutoRefresh = true
     try {
       const counterData = await api.getErrorCounters();
       // Update counter names with language-specific translations
-      const translatedCounters = counterData.map(counter => ({
-        ...counter,
-        name: getCounterName(counter.id)
-      }));
+      const translatedCounters = counterData
+        .map(counter => ({
+          ...counter,
+          name: getCounterName(counter.id)
+        }))
+        .filter(c => !['counter13','counter14','counter15','counter16','counter17'].includes(c.id))
+        .filter(c => {
+          const n = (c.name || '').toLowerCase();
+          // Remove freeze drain, WWT full flush, IMT cleaning variants
+          const blockPhrases = [
+            'opróżnianie mrozowe',
+            'freeze drain',
+            'wwt', // full flush
+            'pełne płukania',
+            'pełne slukania',
+            'imt',
+            'czyszczenia imt',
+            'procedura czyszczenia imt'
+          ];
+          return !blockPhrases.some(p => n.includes(p));
+        });
       setCounters(translatedCounters);
     } catch (error) {
       console.error('Błąd pobierania błędów:', error);
@@ -66,10 +83,20 @@ function ErrorList({ language = 'pl', t = (key) => key, globalAutoRefresh = true
   return (
     <div className="control-grid-container">
       <div className="grid-section">
-        <div className="section-header">
+        <div className="section-header error-header">
           <ErrorOutlineIcon className="section-icon" />
           <span className="section-title">{t('errorList')}</span>
           <span className="section-subtitle">({counters.length} {t('counters')})</span>
+          <div className="counter-legend">
+            <div className="legend-item current">
+              <span className="legend-dot"></span>
+              <span className="legend-text">{t('currentValue')}</span>
+            </div>
+            <div className="legend-item absolute">
+              <span className="legend-dot"></span>
+              <span className="legend-text">{t('absoluteValue')}</span>
+            </div>
+          </div>
         </div>
 
         {counters.length === 0 ? (
@@ -81,25 +108,25 @@ function ErrorList({ language = 'pl', t = (key) => key, globalAutoRefresh = true
           <div className="error-counters-grid">
             {counters.map((counter) => (
               <div key={counter.id} className="counter-card">
-                <div className="counter-header">
+                <div className="counter-left">
                   <span className="counter-name">{counter.name}</span>
+                  <div className="counter-values vertical">
+                    <div className="counter-value-item">
+                      <span className="counter-value big">{counter.value}</span>
+                    </div>
+                    <div className="counter-value-item">
+                      <span className="counter-abs-value big">{counter.absValue}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="counter-right">
                   <button 
-                    className="btn-reset"
+                    className="btn-reset full"
                     onClick={() => handleResetCounter(counter.id)}
                     title={t('resetCounter')}
                   >
                     <ClearIcon />
                   </button>
-                </div>
-                <div className="counter-values">
-                  <div className="counter-value-item">
-                    <span className="counter-label">{t('currentValue')}</span>
-                    <span className="counter-value">{counter.value}</span>
-                  </div>
-                  <div className="counter-value-item">
-                    <span className="counter-label">{t('absoluteValue')}</span>
-                    <span className="counter-abs-value">{counter.absValue}</span>
-                  </div>
                 </div>
               </div>
             ))}
