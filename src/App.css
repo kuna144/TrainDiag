@@ -18,8 +18,8 @@
   --warning: #ffb300;
   --error: #e53935;
   --sidebar-background: #ffffff;
-  --header-height: 64px;
-  --tab-height: 64px;
+  --header-height: 100px;
+  --tab-height: 80px;
 
   /* Modern shadows */
   --shadow-light: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
@@ -103,6 +103,7 @@ body {
   border-radius: var(--radius-md);
   transition: all 0.2s ease;
   backdrop-filter: blur(10px);
+  padding: 12px; /* Larger padding */
 }
 
 .hamburger-btn:hover {
@@ -113,6 +114,14 @@ body {
 .hamburger-btn:active {
   background: rgba(255,255,255,0.3);
   transform: scale(0.95);
+}
+
+/* Updated hamburger button size */
+.hamburger-btn {
+  font-size: 28px;
+  width: 56px;
+  height: 56px;
+  padding: 14px;
 }
 
 /* Side Drawer */
@@ -313,11 +322,11 @@ body {
 .header-sensors {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   overflow: hidden;
-  padding: 4px 4px;
+  padding: 6px 6px;
   flex: none;
-  max-width: clamp(160px, 26vw, 300px);
+  max-width: clamp(200px, 32vw, 360px);
   position: relative;
 }
 
@@ -342,7 +351,7 @@ body {
   display: flex;
   align-items: center;
   gap: 16px;
-  font-size: 24px;
+  font-size: 28px;
   font-weight: 600;
   letter-spacing: 0.5px;
   text-shadow: 0 2px 8px rgba(0,0,0,0.2);
@@ -361,14 +370,14 @@ body {
 .header-sensor {
   display: flex;
   align-items: center;
-  gap: 8px;
-  background: rgba(255,255,255,0.18);
-  border: 1px solid rgba(255,255,255,0.25);
-  padding: 4px 10px 4px 8px;
+  gap: 10px;
+  background: rgba(255,255,255,0.22);
+  border: 1px solid rgba(255,255,255,0.28);
+  padding: 6px 12px 6px 10px;
   border-radius: var(--radius-md);
   backdrop-filter: blur(6px);
   color: #fff;
-  font-size: 12px;
+  font-size: 18px; /* Larger font size */
   line-height: 1.2;
   white-space: nowrap;
   box-shadow: 0 2px 4px rgba(0,0,0,0.25);
@@ -378,8 +387,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   color: #fff;
 }
 
@@ -389,13 +398,13 @@ body {
 }
 
 .header-sensor .name {
-  font-weight: 500;
-  opacity: 0.9;
+  font-weight: 600;
+  opacity: 1;
 }
 
 .header-sensor .value {
-  font-weight: 600;
-  font-size: 13px;
+  font-weight: 800;
+  font-size: 20px; /* Emphasize value */
   letter-spacing: 0.5px;
 }
 
@@ -447,9 +456,9 @@ body {
   background: rgba(255,255,255,0.15);
   border: 1px solid rgba(255,255,255,0.2);
   color: white;
-  font-size: 20px;
-  width: 48px;
-  height: 48px;
+  font-size: 24px;
+  width: 56px;
+  height: 56px;
   border-radius: var(--radius-md);
   cursor: pointer;
   transition: all 0.2s ease;
@@ -474,9 +483,9 @@ body {
   background: rgba(255,255,255,0.15);
   border: 1px solid rgba(255,255,255,0.2);
   color: white;
-  font-size: 20px;
-  width: 48px;
-  height: 48px;
+  font-size: 24px;
+  width: 56px;
+  height: 56px;
   border-radius: var(--radius-md);
   cursor: pointer;
   transition: all 0.2s ease;
@@ -503,6 +512,34 @@ body {
   background: #388e3c;
 }
 
+.fullscreen-btn {
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: white;
+  font-size: 24px;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+  margin-left: 8px;
+}
+
+.fullscreen-btn:hover {
+  background: rgba(255,255,255,0.25);
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.fullscreen-btn:active {
+  background: rgba(255,255,255,0.35);
+  transform: scale(0.95);
+}
+
 /* Navigation */
 .tab-navigation {
   display: flex;
@@ -516,10 +553,10 @@ body {
 .tab-btn {
   flex: 1;
   min-width: 140px;
-  padding: 20px;
+  padding: 24px;
   border: none;
   background: transparent;
-  font-size: 16px;
+  font-size: 22px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -560,6 +597,8 @@ body {
   background: linear-gradient(180deg, rgba(3, 169, 244, 0.05) 0%, transparent 100%);
   font-weight: 600;
 }
+
+
 
 /* Content */
 .app-content {
@@ -1944,10 +1983,6 @@ body {
   color: var(--text-primary);
   font-weight: 500;
 }
-
-
-
-
 
 .btn-set:disabled {
   opacity: 0.5;

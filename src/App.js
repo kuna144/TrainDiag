@@ -324,7 +324,7 @@ function App() {
             {headerSensorsLoading && headerSensors.length === 0 && (
               <div className="header-sensor loading">…</div>
             )}
-            {headerSensors.map(sensor => (
+            {(headerSensors || []).slice(0, 1).map(sensor => (
               <div key={sensor.id} className="header-sensor">
                 <div className="icon-wrap">
                   {getIconForSensor(sensor.id, sensor.description)}
@@ -381,21 +381,21 @@ function App() {
           className={`tab-btn ${activeTab === 'manual' ? 'active' : ''}`}
           onClick={() => setActiveTab('manual')}
         >
-          <BuildIcon sx={{ fontSize: 20, marginRight: 1 }} />
+          <BuildIcon sx={{ fontSize: 26, marginRight: 1 }} />
           {t('manualControl')}
         </button>
         <button 
           className={`tab-btn ${activeTab === 'inputs' ? 'active' : ''}`}
           onClick={() => setActiveTab('inputs')}
         >
-          <InputIcon sx={{ fontSize: 20, marginRight: 1 }} />
+          <InputIcon sx={{ fontSize: 26, marginRight: 1 }} />
           {t('inputsTab')}
         </button>
         <button 
           className={`tab-btn ${activeTab === 'errors' ? 'active' : ''}`}
           onClick={() => setActiveTab('errors')}
         >
-          <ErrorIcon sx={{ fontSize: 20, marginRight: 1 }} />
+          <ErrorIcon sx={{ fontSize: 26, marginRight: 1 }} />
           {t('errorList')}
         </button>
       </nav>

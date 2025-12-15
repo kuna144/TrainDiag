@@ -42,18 +42,16 @@
     "counter17": "counter17"
   },
   "supportedOutputs": {
-        "led0": "Wyjście 1:\nSpłukiwanie",
-        "led1": "Wyjście 2:\nCiśnienie",
-        "led2": "Wyjście 3:\nPodciśnienie",
-        "led3": "Wyjście 4:\nZawór wylotowy",
-        "led4": "Wyjście 5:\nZawór wlotowy",
-        "led5": "Wyjście 6:\nZawór wlotu wody",
-        "led6": "Wyjście 7:\nDysza czyszcząca IMT",
-        "led7": "Wyjście 8:\nZawór dyszy podnoszącej",
-        "led8": "Wyjście 9:\nNieczynne",
-        "led9": "Wyjście 10:\nPrzycisk spłukiwania czerwony",
-        "led10": "Wyjście 11:\nOpróżnianie mrozowe zakończone",
-        "led11": "Wyjście 12:\nPrzycisk spłukiwania zielony"
+        "led0": "Spłukiwanie (S)",
+        "led1": "Ciśnienie (D)",
+        "led2": "Podciśnienie (V)",
+        "led3": "Wylot (A)",
+        "led4": "Wlot (E)",
+        "led5": "Woda (W)",
+        "led8": "Toaleta Wyłączona",
+        "led9": "Przycisk spłukiwania czerwony",
+        "led10": "Koniec mrozowego",
+        "led11": "Toaleta Niegotowa"
   },
   "supportedInputs": {
     "button0": "Wejście 1:\nCzujnik misy",
@@ -140,8 +138,8 @@
       "serviceFunctions": "Funkcje Serwisowe",
       "normalFlush": "Spłukiwanie Normalne",
       "serviceFlush": "Spłukiwanie Serwisowe",
-      "freezeDrainStart": "START Opróżniania Mrożonego",
-      "freezeDrainStop": "STOP Opróżniania Mrożonego",
+      "freezeDrainStart": "START Opróżniania Mrozowego",
+      "freezeDrainStop": "STOP Opróżniania Mrozowego",
       "enterFullscreen": "Pełny ekran",
       "exitFullscreen": "Wyjdź z pełnego ekranu",
       "countersList": "Lista Liczników",
@@ -184,18 +182,16 @@
         "counter17": "Procedura czyszczenia IMT"
       },
       "outputs": {
-        "led0": "Wyjście 1:\nSpłukiwanie",
-        "led1": "Wyjście 2:\nCiśnienie",
-        "led2": "Wyjście 3:\nPodciśnienie",
-        "led3": "Wyjście 4:\nZawór wylotowy",
-        "led4": "Wyjście 5:\nZawór wlotowy",
-        "led5": "Wyjście 6:\nZawór wlotu wody",
-        "led6": "Wyjście 7:\nDysza czyszcząca IMT",
-        "led7": "Wyjście 8:\nZawór dyszy podnoszącej",
-        "led8": "Wyjście 9:\nNieczynne",
-        "led9": "Wyjście 10:\nPrzycisk spłukiwania czerwony",
-        "led10": "Wyjście 11:\nOpróżnianie mrozowe zakończone",
-        "led11": "Wyjście 12:\nPrzycisk spłukiwania zielony"
+        "led0": "Spłukiwanie (S)",
+        "led1": "Ciśnienie (D)",
+        "led2": "Podciśnienie (V)",
+        "led3": "Wylot (A)",
+        "led4": "Wlot (E)",
+        "led5": "Woda (W)",
+        "led8": "Toaleta Wyłączona",
+        "led9": "Przycisk spłukiwania czerwony",
+        "led10": "Koniec mrozowego",
+        "led11": "Toaleta Niegotowa"
       },
       "inputs": {
         "button0": "Wejście 1\nCzujnik misy",
@@ -344,12 +340,10 @@
         "led3": "Output 4:\nOutlet Valve",
         "led4": "Output 5:\nInlet Valve",
         "led5": "Output 6:\nWater inlet valve",
-        "led6": "Output 7:\nCleaning nozzle IMT",
-        "led7": "Output 8:\nRising nozzle valve",
-        "led8": "Output 9:\nOut of order",
-        "led9": "Output 10:\nFlush button red",
-        "led10": "Output 11:\nFreeze drain complete",
-        "led11": "Output 12:\nFlush button green"
+        "led8": "Output 7:\nOut of order",
+        "led9": "Output 8:\nFlush button red",
+        "led10": "Output 9:\nFreeze drain complete",
+        "led11": "Output 10:\nFlush button green"
       },
       "inputs": {
         "button0": "Input 1:\nBowl Sensor",
