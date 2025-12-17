@@ -25,29 +25,6 @@ function getControllerUrl() {
 console.log(`🚀 TrainDiag Server starting...`);
 console.log(`📡 API Proxy forwarding to: ${getControllerUrl()}`);
 
-// API Proxy
-app.use('/api', async (req, res) => {
-  const apiPath = req.originalUrl.replace('/api', '');
-  const url = `${getControllerUrl()}${apiPath}`;
-
-  console.log(`🔗 Proxy: ${req.method} ${req.originalUrl} -> ${url}`);
-
-  try {
-    const response = await axios(url, {
-      method: req.method,
-      headers: req.headers,
-      data: req.method !== 'GET' && req.method !== 'HEAD' ? req.body : undefined,
-      timeout: 30000
-    });
-
-    console.log(`✅ Proxy response: ${response.status}`);
-    res.status(response.status).send(response.data);
-  } catch (error) {
-    console.error('❌ Proxy error:', error.message);
-    res.status(error.response?.status || 500).send(error.message);
-  }
-});
-
 // Endpoint do zmiany IP sterownika w locie
 app.post('/setControllerIp', (req, res) => {
   const { controllerIp } = req.body;
@@ -59,7 +36,7 @@ app.post('/setControllerIp', (req, res) => {
   return res.json({ success: true, controllerIp: currentControllerIp });
 });
 
-// Obsługa flush-x10
+// Obsługa flush-x10 (MUSI BYĆ PRZED OGÓLNYM PROXY!)
 let flushProgress = { active: false, remaining: 0, type: null };
 
 app.post('/api/flush-x10/:type', async (req, res) => {
@@ -109,6 +86,29 @@ app.post('/api/flush-stop', (req, res) => {
   console.log(`🛑 Stopping flush x10 for type: ${flushProgress.type}`);
   flushProgress = { active: false, remaining: 0, type: null };
   res.json({ success: true, message: 'Flush x10 operation stopped.' });
+});
+
+// API Proxy (ogólny - musi być OSTATNI!)
+app.use('/api', async (req, res) => {
+  const apiPath = req.originalUrl.replace('/api', '');
+  const url = `${getControllerUrl()}${apiPath}`;
+
+  console.log(`🔗 Proxy: ${req.method} ${req.originalUrl} -> ${url}`);
+
+  try {
+    const response = await axios(url, {
+      method: req.method,
+      headers: req.headers,
+      data: req.method !== 'GET' && req.method !== 'HEAD' ? req.body : undefined,
+      timeout: 30000
+    });
+
+    console.log(`✅ Proxy response: ${response.status}`);
+    res.status(response.status).send(response.data);
+  } catch (error) {
+    console.error('❌ Proxy error:', error.message);
+    res.status(error.response?.status || 500).send(error.message);
+  }
 });
 
 // Catch-all handler: send back React's index.html file for any non-API routes
