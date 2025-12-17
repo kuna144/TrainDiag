@@ -83,6 +83,62 @@ class ControllerAPI {
     return `http://${this.settings.ipAddress || 'localhost:3000/api'}`;
   }
 
+  getProxyUrl() {
+    // Always use proxy server for flush operations
+    return 'http://localhost:3001/api';
+  }
+
+  // Test proxy connectivity
+  async testProxyConnection() {
+    try {
+      const response = await fetch('http://localhost:3001/api/health');
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Proxy connection test successful:', data);
+        return true;
+      } else {
+        console.error('Proxy connection test failed:', response.status);
+        return false;
+      }
+    } catch (error) {
+      console.error('Proxy connection test error:', error);
+      return false;
+    }
+  }
+
+  // async fetchWithProxy(endpoint, options = {}, customTimeout = config.timeout) {
+  //   const url = `${this.getProxyUrl()}${endpoint}`;
+  //   const headers = {
+  //     'Authorization': this.getAuthHeader(),
+  //     ...options.headers
+  //   };
+
+  //   const controller = new AbortController();
+  //   const timeoutId = setTimeout(() => controller.abort(), customTimeout);
+
+  //   try {
+  //     const response = await fetch(url, {
+  //       ...options,
+  //       headers,
+  //       signal: controller.signal
+  //     });
+
+  //     clearTimeout(timeoutId);
+
+  //     if (!response.ok && response.status !== 304) {
+  //       const errorText = await response.text().catch(() => '');
+  //       console.error('API Error Response:', errorText || `HTTP ${response.status}`);
+  //       throw new Error(`HTTP Error: ${response.status}`);
+  //     }
+
+  //     return response;
+  //   } catch (error) {
+  //     clearTimeout(timeoutId);
+  //     console.error('API Error:', error);
+  //     throw error;
+  //   }
+  // }
+
   async fetchWithAuth(endpoint, options = {}, customTimeout = config.timeout) {
     const url = `${this.getBaseUrl()}${endpoint}`;
     const headers = {
@@ -533,6 +589,69 @@ class ControllerAPI {
     } catch (error) {
       console.error(`Błąd wywołania funkcji serwisowej ${service}:`, error);
       return false;
+    }
+  }
+
+  // Start 10x flush operation
+  async startFlushX10(type) {
+    try {
+      const service = `${type}-x10`;
+      const endpoint = config.endpoints.serviceFunctions.replace('{service}', service);
+      const response = await this.fetchWithAuth(endpoint, { 
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP Error: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log(`Started ${type} flush x10:`, data);
+      return data;
+    } catch (error) {
+      console.error(`Błąd uruchomienia ${type} flush x10:`, error);
+      throw error;
+    }
+  }
+
+  // Get flush operation progress
+  async getFlushProgress() {
+    try {
+      const endpoint = '/flush-progress';
+      const response = await this.fetchWithProxy(endpoint);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP Error: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Błąd pobierania statusu flush:', error);
+      throw error;
+    }
+  }
+
+  // Stop flush operation
+  async stopFlushX10() {
+    try {
+      const endpoint = '/flush-stop';
+      const response = await this.fetchWithProxy(endpoint, { 
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP Error: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log('Stopped flush x10:', data);
+      return data;
+    } catch (error) {
+      console.error('Błąd zatrzymywania flush x10:', error);
+      throw error;
     }
   }
 }

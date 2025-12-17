@@ -11,10 +11,12 @@ import WaterDropIcon from '@mui/icons-material/WaterDrop';
 import BuildIcon from '@mui/icons-material/Build';
 import AcUnitIcon from '@mui/icons-material/AcUnit';
 import StopIcon from '@mui/icons-material/Stop';
+import RepeatIcon from '@mui/icons-material/Repeat';
 
 function ManualControl({ language = 'pl', t = (key) => key, globalAutoRefresh = true }) {
   const [data, setData] = useState({ analog: [], digital: [] });
   const [loading, setLoading] = useState(false);
+  const [flushProgress, setFlushProgress] = useState({ active: false, type: '', remaining: 0, total: 0 });
 
   const fetchData = async () => {
     setLoading(true);
@@ -30,6 +32,10 @@ function ManualControl({ language = 'pl', t = (key) => key, globalAutoRefresh = 
 
   useEffect(() => {
     fetchData();
+    // Test proxy connection
+    api.testProxyConnection().then(connected => {
+      console.log('Proxy connection status:', connected);
+    });
   }, []);
 
   useEffect(() => {
@@ -87,6 +93,63 @@ function ManualControl({ language = 'pl', t = (key) => key, globalAutoRefresh = 
     }
   };
 
+  const handleFlushX10 = async (type) => {
+    try {
+      console.log(`Starting flush x10 for type: ${type}`);
+      const response = await api.startFlushX10(type);
+      console.log('Flush x10 response:', response);
+      if (response.success) {
+        setFlushProgress({ active: true, type, remaining: 10, total: 10 });
+        // Start polling for progress
+        pollFlushProgress();
+      }
+    } catch (error) {
+      console.error(`Błąd uruchomienia ${type} flush x10:`, error);
+    }
+  };
+
+  const handleStopFlush = async () => {
+    try {
+      const response = await api.stopFlushX10();
+      if (response.success) {
+        setFlushProgress({ active: false, type: '', remaining: 0, total: 0 });
+      }
+    } catch (error) {
+      console.error('Błąd zatrzymywania flush:', error);
+    }
+  };
+
+  const pollFlushProgress = async () => {
+    try {
+      const response = await api.getFlushProgress();
+      console.log('Progress polling response:', response);
+      if (response.active) {
+        setFlushProgress({
+          active: true,
+          type: response.type,
+          remaining: response.remaining,
+          total: response.total
+        });
+        // Poll more frequently (every 5 seconds) to show real-time progress
+        setTimeout(pollFlushProgress, 5000);
+      } else {
+        console.log('Flush operation completed');
+        setFlushProgress({ active: false, type: '', remaining: 0, total: 0 });
+        // Refresh data when complete
+        fetchData();
+      }
+    } catch (error) {
+      console.error('Błąd pobierania statusu flush:', error);
+      // On error, stop polling and reset state
+      setFlushProgress({ active: false, type: '', remaining: 0, total: 0 });
+    }
+  };
+
+  // Poll for progress on component mount if there's an active flush
+  useEffect(() => {
+    pollFlushProgress();
+  }, []);
+
   const getIconForSensor = (sensorId) => {
     if (sensorId.includes('temperature') || sensorId.includes('temp')) {
       return <DeviceThermostatIcon className="icon" />;
@@ -108,35 +171,65 @@ function ManualControl({ language = 'pl', t = (key) => key, globalAutoRefresh = 
         {/* Service Functions Row */}
         <div className="grid-section service-functions">
           <h3 className="grid-section-title">{t('serviceFunctions')}</h3>
-          <div className="grid-row service-row">
-            <button
-              className="btn-service normal-flush"
-              onClick={() => handleServiceFunction('normalFlush', t('normalFlush'))}
-            >
-              <WaterDropIcon className="icon" />
-              {t('normalFlush')}
-            </button>
-            <button
-              className="btn-service service-flush"
-              onClick={() => handleServiceFunction('serviceFlush', t('serviceFlush'))}
-            >
-              <BuildIcon className="icon" />
-              {t('serviceFlush')}
-            </button>
-            <button
-              className="btn-service freeze-drain-start"
-              onClick={() => handleServiceFunction('FreezeDrainG', t('freezeDrainStart'))}
-            >
-              <AcUnitIcon className="icon" />
-              {t('freezeDrainStart')}
-            </button>
-            <button
-              className="btn-service freeze-drain-stop"
-              onClick={() => handleServiceFunction('FreezeDrainS', t('freezeDrainStop'))}
-            >
-              <StopIcon className="icon" />
-              {t('freezeDrainStop')}
-            </button>
+          <div className="service-functions-grid">
+            <div className="function-pair">
+              <button
+                className="btn-service normal-flush"
+                onClick={() => handleServiceFunction('normalFlush', t('normalFlush'))}
+              >
+                <WaterDropIcon className="icon" />
+                {t('normalFlush')}
+              </button>
+              <button
+                className={`btn-service normal-flush-x10 ${flushProgress.active && flushProgress.type === 'normal' ? 'active' : ''}`}
+                onClick={() => flushProgress.active && flushProgress.type === 'normal' ? handleStopFlush() : handleFlushX10('normal')}
+                disabled={flushProgress.active && flushProgress.type !== 'normal'}
+              >
+                <RepeatIcon className="icon" />
+                {flushProgress.active && flushProgress.type === 'normal' 
+                  ? `${flushProgress.total - flushProgress.remaining + 1}/${flushProgress.total} STOP` 
+                  : 'x10'}
+              </button>
+            </div>
+            <div className="function-pair">
+              <button
+                className="btn-service service-flush"
+                onClick={() => handleServiceFunction('serviceFlush', t('serviceFlush'))}
+              >
+                <BuildIcon className="icon" />
+                {t('serviceFlush')}
+              </button>
+              <button
+                className={`btn-service service-flush-x10 ${flushProgress.active && flushProgress.type === 'service' ? 'active' : ''}`}
+                onClick={() => flushProgress.active && flushProgress.type === 'service' ? handleStopFlush() : handleFlushX10('service')}
+                disabled={flushProgress.active && flushProgress.type !== 'service'}
+              >
+                <RepeatIcon className="icon" />
+                {flushProgress.active && flushProgress.type === 'service' 
+                  ? `${flushProgress.total - flushProgress.remaining + 1}/${flushProgress.total} STOP` 
+                  : 'x10'}
+              </button>
+            </div>
+            <div className="function-pair">
+              <button
+                className="btn-service freeze-drain-start"
+                onClick={() => handleServiceFunction('FreezeDrainG', t('freezeDrainStart'))}
+              >
+                <AcUnitIcon className="icon" />
+                {t('freezeDrainStart')}
+              </button>
+              <div className="placeholder-btn"></div>
+            </div>
+            <div className="function-pair">
+              <button
+                className="btn-service freeze-drain-stop"
+                onClick={() => handleServiceFunction('FreezeDrainS', t('freezeDrainStop'))}
+              >
+                <StopIcon className="icon" />
+                {t('freezeDrainStop')}
+              </button>
+              <div className="placeholder-btn"></div>
+            </div>
           </div>
         </div>
 

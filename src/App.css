@@ -1218,6 +1218,24 @@ body {
   margin-top: 16px;
 }
 
+.service-functions-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.function-pair {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.placeholder-btn {
+  /* Empty space for buttons without x10 variants */
+}
+
 .btn-service {
   background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
   color: white;
@@ -1277,6 +1295,41 @@ body {
 
 .btn-service.freeze-drain-stop {
   background: linear-gradient(135deg, #f44336, #d32f2f);
+}
+
+.btn-service.normal-flush-x10 {
+  background: linear-gradient(135deg, #8bc34a, #689f38);
+}
+
+.btn-service.service-flush-x10 {
+  background: linear-gradient(135deg, #ff5722, #d84315);
+}
+
+.btn-service.normal-flush-x10.active,
+.btn-service.service-flush-x10.active {
+  background: linear-gradient(135deg, #ffc107, #ff8f00);
+  animation: pulse 1.5s infinite;
+  box-shadow: 0 4px 20px rgba(255, 193, 7, 0.4);
+}
+
+.btn-service:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.btn-service:disabled:hover {
+  transform: none;
+  box-shadow: var(--shadow-light);
+}
+
+@keyframes pulse {
+  0%, 100% { 
+    box-shadow: 0 4px 20px rgba(255, 193, 7, 0.4);
+  }
+  50% { 
+    box-shadow: 0 4px 30px rgba(255, 193, 7, 0.6);
+  }
 }
 
 .btn-service .icon {
