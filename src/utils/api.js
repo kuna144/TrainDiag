@@ -595,8 +595,10 @@ class ControllerAPI {
   // Start 10x flush operation
   async startFlushX10(type) {
     try {
-      const service = `${type}-x10`;
-      const endpoint = config.endpoints.serviceFunctions.replace('{service}', service);
+      //const service = `${type}-x10`;
+      //const endpoint = config.endpoints.serviceFunctions.replace('{service}', service);
+
+      const endpoint = `/flush-x10/${type}`;
       const response = await this.fetchWithAuth(endpoint, { 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
@@ -619,7 +621,7 @@ class ControllerAPI {
   async getFlushProgress() {
     try {
       const endpoint = '/flush-progress';
-      const response = await this.fetchWithProxy(endpoint);
+      const response = await this.fetchWithAuth(endpoint);
       
       if (!response.ok) {
         throw new Error(`HTTP Error: ${response.status}`);
@@ -637,7 +639,7 @@ class ControllerAPI {
   async stopFlushX10() {
     try {
       const endpoint = '/flush-stop';
-      const response = await this.fetchWithProxy(endpoint, { 
+      const response = await this.fetchWithAuth(endpoint, { 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       });

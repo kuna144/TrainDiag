@@ -59,6 +59,58 @@ app.post('/setControllerIp', (req, res) => {
   return res.json({ success: true, controllerIp: currentControllerIp });
 });
 
+// Obsługa flush-x10
+let flushProgress = { active: false, remaining: 0, type: null };
+
+app.post('/api/flush-x10/:type', async (req, res) => {
+  const { type } = req.params;
+
+  if (flushProgress.active) {
+    return res.status(400).json({ error: 'Another flush-x10 operation is already in progress.' });
+  }
+
+  console.log(`🚀 Starting flush x10 for type: ${type}`);
+  flushProgress = { active: true, remaining: 10, type };
+
+  const executeFlushCycle = async () => {
+    try {
+      const url = `${getControllerUrl()}/serviceFunctions.cgi?service=${type}`;
+      console.log(`🔄 Executing flush cycle: ${flushProgress.remaining}/10 -> ${url}`);
+      await axios.get(url, { timeout: 30000 });
+      flushProgress.remaining -= 1;
+
+      if (flushProgress.remaining > 0) {
+        setTimeout(executeFlushCycle, 30000); // Wait 30 seconds before the next cycle
+      } else {
+        console.log(`✅ Flush x10 completed for type: ${type}`);
+        flushProgress = { active: false, remaining: 0, type: null };
+      }
+    } catch (error) {
+      console.error(`❌ Error during flush cycle: ${error.message}`);
+      flushProgress = { active: false, remaining: 0, type: null };
+    }
+  };
+
+  executeFlushCycle();
+  res.json({ success: true, message: `Flush x10 started for type: ${type}` });
+});
+
+// Endpoint do sprawdzania statusu flush-x10
+app.get('/api/flush-progress', (req, res) => {
+  res.json(flushProgress);
+});
+
+// Endpoint do zatrzymania flush-x10
+app.post('/api/flush-stop', (req, res) => {
+  if (!flushProgress.active) {
+    return res.status(400).json({ error: 'No active flush-x10 operation to stop.' });
+  }
+
+  console.log(`🛑 Stopping flush x10 for type: ${flushProgress.type}`);
+  flushProgress = { active: false, remaining: 0, type: null };
+  res.json({ success: true, message: 'Flush x10 operation stopped.' });
+});
+
 // Catch-all handler: send back React's index.html file for any non-API routes
 app.use((req, res) => {
   if (!req.url.startsWith('/api')) {
