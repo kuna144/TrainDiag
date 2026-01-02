@@ -201,7 +201,7 @@ function ManualControl({ language = 'pl', t = (key) => key, globalAutoRefresh = 
               </button>
               <button
                 className={`btn-service service-flush-x10 ${flushProgress.active && flushProgress.type === 'service' ? 'active' : ''}`}
-                onClick={() => flushProgress.active && flushProgress.type === 'service' ? handleStopFlush() : handleFlushX10('service')}
+                onClick={() => flushProgress.active && flushProgress.type === 'service' ? handleStopFlush() : handleFlushX10('serviceFlush')}
                 disabled={flushProgress.active && flushProgress.type !== 'service'}
               >
                 <RepeatIcon className="icon" />

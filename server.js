@@ -53,7 +53,16 @@ app.post('/api/flush-x10/:type', async (req, res) => {
     try {
       const url = `${getControllerUrl()}/serviceFunctions.cgi?service=${type}`;
       console.log(`🔄 Executing flush cycle: ${flushProgress.remaining}/10 -> ${url}`);
-      await axios.get(url, { timeout: 30000 });
+      // await axios.get(url, { timeout: 30000 });
+ 
+      const response = await axios(url, {
+        method: 'GET',
+        headers: req.headers,
+        data: req.method !== 'GET' && req.method !== 'HEAD' ? req.body : undefined,
+        timeout: 30000
+      });
+      console.log(`✅ Proxy response: ${response.status}`);
+      // res.status(response.status).send(response.data);
       flushProgress.remaining -= 1;
 
       if (flushProgress.remaining > 0) {
