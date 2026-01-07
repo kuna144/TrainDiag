@@ -21,6 +21,7 @@ function ManualControl({ language = 'pl', t = (key) => key, globalAutoRefresh = 
   const [serviceFlushCounter, setServiceFlushCounter] = useState(0);
   const [pressTimer, setPressTimer] = useState(null);
   const [isLongPress, setIsLongPress] = useState(false);
+  const [activeProcess, setActiveProcess] = useState(null); // 'normal', 'service', 'freezeDrain', null
   const flushStartTimer = React.useRef(null);
 
   const fetchData = async () => {
@@ -85,6 +86,12 @@ function ManualControl({ language = 'pl', t = (key) => key, globalAutoRefresh = 
   const handleServiceFunction = async (service, functionName) => {
     try {
       console.log(`Wywołanie funkcji serwisowej: ${service}`);
+      
+      // Set active process for FreezeDrain
+      if (service === 'FreezeDrainG') {
+        setActiveProcess('freezeDrain');
+      }
+      
       const success = await api.callServiceFunction(service);
       if (success) {
         console.log(`Funkcja ${functionName} została wykonana pomyślnie`);
@@ -92,9 +99,15 @@ function ManualControl({ language = 'pl', t = (key) => key, globalAutoRefresh = 
         setTimeout(fetchData, 500);
       } else {
         console.error(`Błąd wykonania funkcji ${functionName}`);
+        if (service === 'FreezeDrainG') {
+          setActiveProcess(null);
+        }
       }
     } catch (error) {
       console.error(`Błąd wywołania funkcji serwisowej ${service}:`, error);
+      if (service === 'FreezeDrainG') {
+        setActiveProcess(null);
+      }
     }
   };
 
@@ -154,6 +167,25 @@ function ManualControl({ language = 'pl', t = (key) => key, globalAutoRefresh = 
     }
   };
 
+  const handleUniversalStop = async () => {
+    // Stop flush if active
+    if (flushProgress.active) {
+      if (flushProgress.type === 'normal') {
+        setNormalFlushCounter(0);
+        setActiveProcess(null);
+      } else if (flushProgress.type === 'service') {
+        setServiceFlushCounter(0);
+        setActiveProcess(null);
+      }
+      await handleStopFlush();
+    }
+    // Stop FreezeDrain if active
+    else if (activeProcess === 'freezeDrain') {
+      await handleServiceFunction('FreezeDrainS', t('freezeDrainStop'));
+      setActiveProcess(null);
+    }
+  };
+
   const pollFlushProgress = async () => {
     try {
       const response = await api.getFlushProgress();
@@ -171,8 +203,10 @@ function ManualControl({ language = 'pl', t = (key) => key, globalAutoRefresh = 
         // Update counters based on progress
         if (mappedType === 'normal') {
           setNormalFlushCounter(response.remaining);
+          setActiveProcess('normal');
         } else if (mappedType === 'service') {
           setServiceFlushCounter(response.remaining);
+          setActiveProcess('service');
         }
         // Poll more frequently (every 2 seconds) to show real-time progress
         setTimeout(pollFlushProgress, 2000);
@@ -181,6 +215,7 @@ function ManualControl({ language = 'pl', t = (key) => key, globalAutoRefresh = 
         setFlushProgress({ active: false, type: '', remaining: 0, total: 0 });
         setNormalFlushCounter(0);
         setServiceFlushCounter(0);
+        setActiveProcess(null);
         // Refresh data when complete
         fetchData();
       }
@@ -190,6 +225,7 @@ function ManualControl({ language = 'pl', t = (key) => key, globalAutoRefresh = 
       setFlushProgress({ active: false, type: '', remaining: 0, total: 0 });
       setNormalFlushCounter(0);
       setServiceFlushCounter(0);
+      setActiveProcess(null);
     }
   };
 
@@ -284,6 +320,7 @@ function ManualControl({ language = 'pl', t = (key) => key, globalAutoRefresh = 
               }}
               onTouchStart={() => handleFlushButtonPress('normal')}
               onTouchEnd={() => handleFlushButtonRelease('normal')}
+              disabled={activeProcess && activeProcess !== 'normal'}
             >
               <WaterDropIcon className="icon" />
               {t('normalFlush')}
@@ -301,6 +338,7 @@ function ManualControl({ language = 'pl', t = (key) => key, globalAutoRefresh = 
               }}
               onTouchStart={() => handleFlushButtonPress('service')}
               onTouchEnd={() => handleFlushButtonRelease('service')}
+              disabled={activeProcess && activeProcess !== 'service'}
             >
               <BuildIcon className="icon" />
               {t('serviceFlush')}
@@ -309,16 +347,18 @@ function ManualControl({ language = 'pl', t = (key) => key, globalAutoRefresh = 
             <button
               className="btn-service freeze-drain-start"
               onClick={() => handleServiceFunction('FreezeDrainG', t('freezeDrainStart'))}
+              disabled={activeProcess !== null}
             >
               <AcUnitIcon className="icon" />
               {t('freezeDrainStart')}
             </button>
             <button
-              className="btn-service freeze-drain-stop"
-              onClick={() => handleServiceFunction('FreezeDrainS', t('freezeDrainStop'))}
+              className={`btn-service universal-stop ${activeProcess ? 'active' : ''}`}
+              onClick={handleUniversalStop}
+              disabled={!activeProcess}
             >
               <StopIcon className="icon" />
-              {t('freezeDrainStop')}
+              {activeProcess ? 'STOP' : t('stop')}
             </button>
           </div>
         </div>

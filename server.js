@@ -65,7 +65,6 @@ app.post('/api/flush-x10/:type', async (req, res) => {
 
       const url = `${getControllerUrl()}/serviceFunctions.cgi?service=${type}`;
       console.log(`🔄 Executing flush cycle: ${flushProgress.remaining}/${flushProgress.total} -> ${url}`);
-      // await axios.get(url, { timeout: 30000 });
  
       const response = await axios(url, {
         method: 'GET',
@@ -79,7 +78,7 @@ app.post('/api/flush-x10/:type', async (req, res) => {
 
       // Check again if still active before scheduling next cycle
       if (flushProgress.active && flushProgress.remaining > 0) {
-        setTimeout(executeFlushCycle, 30000); // Wait 30 seconds before the next cycle
+        setTimeout(executeFlushCycle, 60000); // Wait 60 seconds before the next cycle
       } else if (flushProgress.active && flushProgress.remaining === 0) {
         console.log(`✅ Flush completed for type: ${type}`);
         flushProgress = { active: false, remaining: 0, type: null, total: 0 };

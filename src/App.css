@@ -1271,8 +1271,16 @@ body {
   background: linear-gradient(135deg, #2196f3, #1976d2);
 }
 
-.btn-service.freeze-drain-stop {
+.btn-service.universal-stop {
   background: linear-gradient(135deg, #f44336, #d32f2f);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.btn-service.universal-stop.active {
+  background: linear-gradient(135deg, #ff1744, #c62828);
+  animation: pulse 1.5s infinite;
+  box-shadow: 0 4px 20px rgba(244, 67, 54, 0.5);
 }
 
 .btn-service.active {
