@@ -330,17 +330,6 @@ body {
   position: relative;
 }
 
-.header-sensors::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 28px;
-  height: 100%;
-  pointer-events: none;
-  background: linear-gradient(to right, rgba(255,255,255,0), rgba(255,255,255,0.35));
-}
-
 /* Centered title */
 .app-header .center-title {
   position: absolute;
