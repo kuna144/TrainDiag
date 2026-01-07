@@ -1220,20 +1220,9 @@ body {
 
 .service-functions-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
   margin-top: 16px;
-}
-
-.function-pair {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 8px;
-  align-items: stretch;
-}
-
-.placeholder-btn {
-  /* Empty space for buttons without x10 variants */
 }
 
 .btn-service {
@@ -1297,19 +1286,19 @@ body {
   background: linear-gradient(135deg, #f44336, #d32f2f);
 }
 
-.btn-service.normal-flush-x10 {
-  background: linear-gradient(135deg, #8bc34a, #689f38);
-}
-
-.btn-service.service-flush-x10 {
-  background: linear-gradient(135deg, #ff5722, #d84315);
-}
-
-.btn-service.normal-flush-x10.active,
-.btn-service.service-flush-x10.active {
+.btn-service.active {
   background: linear-gradient(135deg, #ffc107, #ff8f00);
   animation: pulse 1.5s infinite;
   box-shadow: 0 4px 20px rgba(255, 193, 7, 0.4);
+}
+
+@keyframes pulse {
+  0%, 100% { 
+    box-shadow: 0 4px 20px rgba(255, 193, 7, 0.4);
+  }
+  50% { 
+    box-shadow: 0 4px 30px rgba(255, 193, 7, 0.6);
+  }
 }
 
 .btn-service:disabled {
@@ -1323,17 +1312,48 @@ body {
   box-shadow: var(--shadow-light);
 }
 
-@keyframes pulse {
-  0%, 100% { 
-    box-shadow: 0 4px 20px rgba(255, 193, 7, 0.4);
-  }
-  50% { 
-    box-shadow: 0 4px 30px rgba(255, 193, 7, 0.6);
-  }
-}
-
 .btn-service .icon {
   font-size: 20px;
+}
+
+/* Counter badge for flush buttons */
+.btn-service .counter-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--text-primary);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  animation: fadeIn 0.3s ease;
+}
+
+.btn-service.active .counter-badge {
+  background: linear-gradient(135deg, #ffc107, #ff8f00);
+  color: white;
+  animation: pulse 1.5s infinite;
+}
+
+.btn-service.has-counter {
+  padding-right: 56px;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .output-item.readonly {

@@ -37,22 +37,28 @@ app.post('/setControllerIp', (req, res) => {
 });
 
 // Obsługa flush-x10 (MUSI BYĆ PRZED OGÓLNYM PROXY!)
-let flushProgress = { active: false, remaining: 0, type: null };
+let flushProgress = { active: false, remaining: 0, type: null, total: 0 };
 
 app.post('/api/flush-x10/:type', async (req, res) => {
   const { type } = req.params;
+  const { count } = req.body;
+  const flushCount = count || 10;
 
   if (flushProgress.active) {
     return res.status(400).json({ error: 'Another flush-x10 operation is already in progress.' });
   }
 
-  console.log(`🚀 Starting flush x10 for type: ${type}`);
-  flushProgress = { active: true, remaining: 10, type };
+  // Map type to consistent format for frontend
+  const mappedType = type === 'normal' || type === 'normalFlush' ? 'normal' : 
+                     type === 'service' || type === 'serviceFlush' ? 'service' : type;
+
+  console.log(`🚀 Starting flush with ${flushCount} cycles for type: ${type} (mapped: ${mappedType})`);
+  flushProgress = { active: true, remaining: flushCount, type: mappedType, total: flushCount };
 
   const executeFlushCycle = async () => {
     try {
       const url = `${getControllerUrl()}/serviceFunctions.cgi?service=${type}`;
-      console.log(`🔄 Executing flush cycle: ${flushProgress.remaining}/10 -> ${url}`);
+      console.log(`🔄 Executing flush cycle: ${flushProgress.remaining}/${flushProgress.total} -> ${url}`);
       // await axios.get(url, { timeout: 30000 });
  
       const response = await axios(url, {
@@ -68,17 +74,17 @@ app.post('/api/flush-x10/:type', async (req, res) => {
       if (flushProgress.remaining > 0) {
         setTimeout(executeFlushCycle, 30000); // Wait 30 seconds before the next cycle
       } else {
-        console.log(`✅ Flush x10 completed for type: ${type}`);
-        flushProgress = { active: false, remaining: 0, type: null };
+        console.log(`✅ Flush completed for type: ${type}`);
+        flushProgress = { active: false, remaining: 0, type: null, total: 0 };
       }
     } catch (error) {
       console.error(`❌ Error during flush cycle: ${error.message}`);
-      flushProgress = { active: false, remaining: 0, type: null };
+      flushProgress = { active: false, remaining: 0, type: null, total: 0 };
     }
   };
 
   executeFlushCycle();
-  res.json({ success: true, message: `Flush x10 started for type: ${type}` });
+  res.json({ success: true, message: `Flush started with ${flushCount} cycles for type: ${type}` });
 });
 
 // Endpoint do sprawdzania statusu flush-x10
@@ -92,9 +98,9 @@ app.post('/api/flush-stop', (req, res) => {
     return res.status(400).json({ error: 'No active flush-x10 operation to stop.' });
   }
 
-  console.log(`🛑 Stopping flush x10 for type: ${flushProgress.type}`);
-  flushProgress = { active: false, remaining: 0, type: null };
-  res.json({ success: true, message: 'Flush x10 operation stopped.' });
+  console.log(`🛑 Stopping flush for type: ${flushProgress.type}`);
+  flushProgress = { active: false, remaining: 0, type: null, total: 0 };
+  res.json({ success: true, message: 'Flush operation stopped.' });
 });
 
 // API Proxy (ogólny - musi być OSTATNI!)
