@@ -57,6 +57,12 @@ app.post('/api/flush-x10/:type', async (req, res) => {
 
   const executeFlushCycle = async () => {
     try {
+      // Check if flush is still active (could have been stopped)
+      if (!flushProgress.active) {
+        console.log(`⏹️ Flush was stopped, aborting cycle`);
+        return;
+      }
+
       const url = `${getControllerUrl()}/serviceFunctions.cgi?service=${type}`;
       console.log(`🔄 Executing flush cycle: ${flushProgress.remaining}/${flushProgress.total} -> ${url}`);
       // await axios.get(url, { timeout: 30000 });
@@ -71,9 +77,10 @@ app.post('/api/flush-x10/:type', async (req, res) => {
       // res.status(response.status).send(response.data);
       flushProgress.remaining -= 1;
 
-      if (flushProgress.remaining > 0) {
+      // Check again if still active before scheduling next cycle
+      if (flushProgress.active && flushProgress.remaining > 0) {
         setTimeout(executeFlushCycle, 30000); // Wait 30 seconds before the next cycle
-      } else {
+      } else if (flushProgress.active && flushProgress.remaining === 0) {
         console.log(`✅ Flush completed for type: ${type}`);
         flushProgress = { active: false, remaining: 0, type: null, total: 0 };
       }
