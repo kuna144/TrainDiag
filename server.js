@@ -22,6 +22,10 @@ function getControllerUrl() {
   return `http://${currentControllerIp}`;
 }
 
+function waitMSeconds(ms) {
+   return new Promise(resolve => setTimeout(resolve, ms));
+ }
+
 console.log(`🚀 TrainDiag Server starting...`);
 console.log(`📡 API Proxy forwarding to: ${getControllerUrl()}`);
 
@@ -63,8 +67,11 @@ app.post('/api/flush-x10/:type', async (req, res) => {
         return;
       }
 
+      // Capture current remaining value BEFORE executing the request
+      const currentRemaining = flushProgress.remaining;
+      
       const url = `${getControllerUrl()}/serviceFunctions.cgi?service=${type}`;
-      console.log(`🔄 Executing flush cycle: ${flushProgress.remaining}/${flushProgress.total} -> ${url}`);
+      console.log(`🔄 Executing flush cycle: ${currentRemaining}/${flushProgress.total} -> ${url}`);
  
       const response = await axios(url, {
         method: 'GET',
@@ -73,12 +80,17 @@ app.post('/api/flush-x10/:type', async (req, res) => {
         timeout: 30000
       });
       console.log(`✅ Proxy response: ${response.status}`);
-      // res.status(response.status).send(response.data);
-      flushProgress.remaining -= 1;
+      await waitMSeconds(3000); // Krótkie opóźnienie między cyklami
+      // Only decrement if the value hasn't changed (no user update during request)
+      if (flushProgress.remaining === currentRemaining) {
+        flushProgress.remaining -= 1;
+      } else {
+        console.log(`⚠️ Remaining was updated during request (${currentRemaining} → ${flushProgress.remaining}), skipping decrement`);
+      }
 
       // Check again if still active before scheduling next cycle
       if (flushProgress.active && flushProgress.remaining > 0) {
-        setTimeout(executeFlushCycle, 60000); // Wait 60 seconds before the next cycle
+        setTimeout(executeFlushCycle, 57000); // Wait 60 seconds before the next cycle
       } else if (flushProgress.active && flushProgress.remaining === 0) {
         console.log(`✅ Flush completed for type: ${type}`);
         flushProgress = { active: false, remaining: 0, type: null, total: 0 };
@@ -107,6 +119,22 @@ app.post('/api/flush-stop', (req, res) => {
   console.log(`🛑 Stopping flush for type: ${flushProgress.type}`);
   flushProgress = { active: false, remaining: 0, type: null, total: 0 };
   res.json({ success: true, message: 'Flush operation stopped.' });
+});
+
+// Endpoint do aktualizacji licznika podczas aktywnego flush
+app.post('/api/flush-update/:type', (req, res) => {
+  const { type } = req.params;
+  const { count } = req.body;
+
+  if (!flushProgress.active) {
+    return res.status(400).json({ error: 'No active flush operation to update.' });
+  }
+
+  console.log(`🔄 Updating flush count from ${flushProgress.remaining} to ${count} for type: ${type}`);
+  flushProgress.remaining = count;
+  flushProgress.total = Math.max(flushProgress.total, count);
+  
+  res.json({ success: true, message: `Flush count updated to ${count}`, remaining: count, total: flushProgress.total });
 });
 
 // API Proxy (ogólny - musi być OSTATNI!)

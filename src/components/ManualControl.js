@@ -22,6 +22,7 @@ function ManualControl({ language = 'pl', t = (key) => key, globalAutoRefresh = 
   const [pressTimer, setPressTimer] = useState(null);
   const [isLongPress, setIsLongPress] = useState(false);
   const [activeProcess, setActiveProcess] = useState(null); // 'normal', 'service', 'freezeDrain', null
+  const [pendingUpdate, setPendingUpdate] = useState({ normal: false, service: false });
   const flushStartTimer = React.useRef(null);
 
   const fetchData = async () => {
@@ -114,24 +115,12 @@ function ManualControl({ language = 'pl', t = (key) => key, globalAutoRefresh = 
   const handleFlushButtonPress = (type) => {
     setIsLongPress(false);
     const timer = setTimeout(() => {
-      // Long press (3 seconds) - add 10 or reset to 0
+      // Long press (3 seconds) - always add 10
       setIsLongPress(true);
       if (type === 'normal') {
-        if (flushProgress.active && flushProgress.type === 'normal') {
-          // Reset counter if active
-          setNormalFlushCounter(0);
-          handleStopFlush();
-        } else {
-          setNormalFlushCounter(prev => prev + 10);
-        }
+        setNormalFlushCounter(prev => prev + 10);
       } else if (type === 'service') {
-        if (flushProgress.active && flushProgress.type === 'service') {
-          // Reset counter if active
-          setServiceFlushCounter(0);
-          handleStopFlush();
-        } else {
-          setServiceFlushCounter(prev => prev + 10);
-        }
+        setServiceFlushCounter(prev => prev + 10);
       }
     }, 3000);
     setPressTimer(timer);
@@ -141,14 +130,14 @@ function ManualControl({ language = 'pl', t = (key) => key, globalAutoRefresh = 
     if (pressTimer) {
       clearTimeout(pressTimer);
       setPressTimer(null);
-    }
-    
-    // Short press - increment counter by 1 (only if not long press)
-    if (!isLongPress) {
-      if (type === 'normal') {
-        setNormalFlushCounter(prev => prev + 1);
-      } else if (type === 'service') {
-        setServiceFlushCounter(prev => prev + 1);
+      
+      // Short press - increment counter by 1 (only if not long press)
+      if (!isLongPress) {
+        if (type === 'normal') {
+          setNormalFlushCounter(prev => prev + 1);
+        } else if (type === 'service') {
+          setServiceFlushCounter(prev => prev + 1);
+        }
       }
     }
     setIsLongPress(false);
@@ -200,14 +189,11 @@ function ManualControl({ language = 'pl', t = (key) => key, globalAutoRefresh = 
           remaining: response.remaining,
           total: response.total
         });
-        // Update counters based on progress
-        if (mappedType === 'normal') {
-          setNormalFlushCounter(response.remaining);
-          setActiveProcess('normal');
-        } else if (mappedType === 'service') {
-          setServiceFlushCounter(response.remaining);
-          setActiveProcess('service');
-        }
+        
+        // Only set active process, NEVER update counters from server during active flush
+        // User's local counter is the source of truth
+        setActiveProcess(mappedType);
+        
         // Poll more frequently (every 2 seconds) to show real-time progress
         setTimeout(pollFlushProgress, 2000);
       } else {
@@ -216,6 +202,7 @@ function ManualControl({ language = 'pl', t = (key) => key, globalAutoRefresh = 
         setNormalFlushCounter(0);
         setServiceFlushCounter(0);
         setActiveProcess(null);
+        setPendingUpdate({ normal: false, service: false });
         // Refresh data when complete
         fetchData();
       }
@@ -226,6 +213,7 @@ function ManualControl({ language = 'pl', t = (key) => key, globalAutoRefresh = 
       setNormalFlushCounter(0);
       setServiceFlushCounter(0);
       setActiveProcess(null);
+      setPendingUpdate({ normal: false, service: false });
     }
   };
 
@@ -234,17 +222,51 @@ function ManualControl({ language = 'pl', t = (key) => key, globalAutoRefresh = 
     pollFlushProgress();
   }, []);
 
+  // Decrement local counter when server completes a cycle
+  const prevRemainingRef = React.useRef(null);
+  useEffect(() => {
+    if (flushProgress.active && flushProgress.remaining !== null) {
+      // Only decrement if no pending update to server
+      // If remaining decreased, decrement local counter
+      if (prevRemainingRef.current !== null && flushProgress.remaining < prevRemainingRef.current) {
+        const decrease = prevRemainingRef.current - flushProgress.remaining;
+        if (flushProgress.type === 'normal' && !pendingUpdate.normal) {
+          setNormalFlushCounter(prev => Math.max(0, prev - decrease));
+        } else if (flushProgress.type === 'service' && !pendingUpdate.service) {
+          setServiceFlushCounter(prev => Math.max(0, prev - decrease));
+        }
+      }
+      prevRemainingRef.current = flushProgress.remaining;
+    } else {
+      prevRemainingRef.current = null;
+    }
+  }, [flushProgress.remaining, flushProgress.active, flushProgress.type, pendingUpdate]);
+
   // Start flush when counter changes from 0 (with debounce)
   useEffect(() => {
-    if (normalFlushCounter > 0 && !flushProgress.active) {
+    if (normalFlushCounter > 0) {
       // Clear previous timer
       if (flushStartTimer.current) {
         clearTimeout(flushStartTimer.current);
       }
-      // Start flush after 500ms of no clicks
-      flushStartTimer.current = setTimeout(() => {
-        startFlushOperation('normal', normalFlushCounter);
-      }, 500);
+      // If already active, update the count on server
+      if (flushProgress.active && flushProgress.type === 'normal') {
+        setPendingUpdate(prev => ({ ...prev, normal: true }));
+        flushStartTimer.current = setTimeout(() => {
+          updateFlushCount('normal', normalFlushCounter).finally(() => {
+            setPendingUpdate(prev => ({ ...prev, normal: false }));
+          });
+        }, 500);
+      }
+      // If not active, start new flush after 500ms
+      else if (!flushProgress.active) {
+        setPendingUpdate(prev => ({ ...prev, normal: true }));
+        flushStartTimer.current = setTimeout(() => {
+          startFlushOperation('normal', normalFlushCounter).finally(() => {
+            setPendingUpdate(prev => ({ ...prev, normal: false }));
+          });
+        }, 500);
+      }
     }
     return () => {
       if (flushStartTimer.current) {
@@ -254,15 +276,29 @@ function ManualControl({ language = 'pl', t = (key) => key, globalAutoRefresh = 
   }, [normalFlushCounter]);
 
   useEffect(() => {
-    if (serviceFlushCounter > 0 && !flushProgress.active) {
+    if (serviceFlushCounter > 0) {
       // Clear previous timer
       if (flushStartTimer.current) {
         clearTimeout(flushStartTimer.current);
       }
-      // Start flush after 500ms of no clicks
-      flushStartTimer.current = setTimeout(() => {
-        startFlushOperation('serviceFlush', serviceFlushCounter);
-      }, 500);
+      // If already active, update the count on server
+      if (flushProgress.active && flushProgress.type === 'service') {
+        setPendingUpdate(prev => ({ ...prev, service: true }));
+        flushStartTimer.current = setTimeout(() => {
+          updateFlushCount('serviceFlush', serviceFlushCounter).finally(() => {
+            setPendingUpdate(prev => ({ ...prev, service: false }));
+          });
+        }, 500);
+      }
+      // If not active, start new flush after 500ms
+      else if (!flushProgress.active) {
+        setPendingUpdate(prev => ({ ...prev, service: true }));
+        flushStartTimer.current = setTimeout(() => {
+          startFlushOperation('serviceFlush', serviceFlushCounter).finally(() => {
+            setPendingUpdate(prev => ({ ...prev, service: false }));
+          });
+        }, 500);
+      }
     }
     return () => {
       if (flushStartTimer.current) {
@@ -283,6 +319,18 @@ function ManualControl({ language = 'pl', t = (key) => key, globalAutoRefresh = 
       }
     } catch (error) {
       console.error(`Błąd uruchomienia ${type} flush:`, error);
+    }
+  };
+
+  const updateFlushCount = async (type, count) => {
+    try {
+      console.log(`Updating flush count to ${count} for type: ${type}`);
+      const response = await api.updateFlushCount(type, count);
+      if (response.success) {
+        console.log('Flush count updated successfully');
+      }
+    } catch (error) {
+      console.error(`Błąd aktualizacji licznika flush:`, error);
     }
   };
 

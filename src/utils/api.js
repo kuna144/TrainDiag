@@ -637,6 +637,7 @@ class ControllerAPI {
   }
 
   // Stop flush operation
+  // Stop flush operation
   async stopFlushX10() {
     try {
       const endpoint = '/flush-stop';
@@ -654,6 +655,29 @@ class ControllerAPI {
       return data;
     } catch (error) {
       console.error('Błąd zatrzymywania flush x10:', error);
+      throw error;
+    }
+  }
+
+  // Update flush count during active operation
+  async updateFlushCount(type, count) {
+    try {
+      const endpoint = `/flush-update/${type}`;
+      const response = await this.fetchWithAuth(endpoint, { 
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ count })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP Error: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log('Updated flush count:', data);
+      return data;
+    } catch (error) {
+      console.error('Błąd aktualizacji licznika flush:', error);
       throw error;
     }
   }
