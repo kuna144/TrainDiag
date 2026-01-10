@@ -55,7 +55,8 @@ function ManualControl({ language = 'pl', t = (key) => key, globalAutoRefresh = 
     return () => clearInterval(interval);
   }, [globalAutoRefresh]);
 
-  const handleToggleOutput = async (outputId, currentState) => {
+  const handleToggleOutput = async (e, outputId, currentState) => {
+    e.preventDefault(); // Zapobiega duplikowaniu eventów
     try {
       // Obsługa Vacuum (output 3) - steruje jednocześnie output 2 i 3
       if (outputId === 'led2') {
@@ -112,7 +113,14 @@ function ManualControl({ language = 'pl', t = (key) => key, globalAutoRefresh = 
     }
   };
 
-  const handleFlushButtonPress = (type) => {
+  const handleFlushButtonPress = (e, type) => {
+    e.preventDefault(); // Zapobiega duplikowaniu eventów
+    
+    // Blokuj menu kontekstowe dla eventów dotykowych
+    if (e.pointerType === 'touch') {
+      e.target.addEventListener('contextmenu', preventContextMenu, { once: true });
+    }
+    
     setIsLongPress(false);
     const timer = setTimeout(() => {
       // Long press (3 seconds) - always add 10
@@ -126,7 +134,14 @@ function ManualControl({ language = 'pl', t = (key) => key, globalAutoRefresh = 
     setPressTimer(timer);
   };
 
-  const handleFlushButtonRelease = async (type) => {
+  const handleFlushButtonRelease = async (e, type) => {
+    e.preventDefault(); // Zapobiega duplikowaniu eventów
+    
+    // Usuń blokadę menu kontekstowego
+    if (e.pointerType === 'touch') {
+      e.target.removeEventListener('contextmenu', preventContextMenu);
+    }
+    
     if (pressTimer) {
       clearTimeout(pressTimer);
       setPressTimer(null);
@@ -141,6 +156,28 @@ function ManualControl({ language = 'pl', t = (key) => key, globalAutoRefresh = 
       }
     }
     setIsLongPress(false);
+  };
+
+  const handleFlushButtonCancel = (e) => {
+    e.preventDefault();
+    
+    // Usuń blokadę menu kontekstowego
+    if (e.pointerType === 'touch') {
+      e.target.removeEventListener('contextmenu', preventContextMenu);
+    }
+    
+    if (pressTimer) {
+      clearTimeout(pressTimer);
+      setPressTimer(null);
+    }
+    setIsLongPress(false);
+  };
+
+  // Helper function to prevent context menu
+  const preventContextMenu = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    return false;
   };
 
   const handleStopFlush = async () => {
@@ -358,16 +395,17 @@ function ManualControl({ language = 'pl', t = (key) => key, globalAutoRefresh = 
           <div className="service-functions-grid">
             <button
               className={`btn-service normal-flush ${normalFlushCounter > 0 ? 'has-counter' : ''} ${flushProgress.active && flushProgress.type === 'normal' ? 'active' : ''}`}
-              onMouseDown={() => handleFlushButtonPress('normal')}
-              onMouseUp={() => handleFlushButtonRelease('normal')}
-              onMouseLeave={() => {
-                if (pressTimer) {
-                  clearTimeout(pressTimer);
-                  setPressTimer(null);
-                }
+              onPointerDown={(e) => handleFlushButtonPress(e, 'normal')}
+              onPointerUp={(e) => handleFlushButtonRelease(e, 'normal')}
+              onPointerLeave={handleFlushButtonCancel}
+              onPointerCancel={handleFlushButtonCancel}
+              onContextMenu={preventContextMenu}
+              style={{ 
+                WebkitTouchCallout: 'none',
+                WebkitUserSelect: 'none',
+                userSelect: 'none',
+                touchAction: 'manipulation'
               }}
-              onTouchStart={() => handleFlushButtonPress('normal')}
-              onTouchEnd={() => handleFlushButtonRelease('normal')}
               disabled={activeProcess && activeProcess !== 'normal'}
             >
               <WaterDropIcon className="icon" />
@@ -376,16 +414,17 @@ function ManualControl({ language = 'pl', t = (key) => key, globalAutoRefresh = 
             </button>
             <button
               className={`btn-service service-flush ${serviceFlushCounter > 0 ? 'has-counter' : ''} ${flushProgress.active && flushProgress.type === 'service' ? 'active' : ''}`}
-              onMouseDown={() => handleFlushButtonPress('service')}
-              onMouseUp={() => handleFlushButtonRelease('service')}
-              onMouseLeave={() => {
-                if (pressTimer) {
-                  clearTimeout(pressTimer);
-                  setPressTimer(null);
-                }
+              onPointerDown={(e) => handleFlushButtonPress(e, 'service')}
+              onPointerUp={(e) => handleFlushButtonRelease(e, 'service')}
+              onPointerLeave={handleFlushButtonCancel}
+              onPointerCancel={handleFlushButtonCancel}
+              onContextMenu={preventContextMenu}
+              style={{ 
+                WebkitTouchCallout: 'none',
+                WebkitUserSelect: 'none',
+                userSelect: 'none',
+                touchAction: 'manipulation'
               }}
-              onTouchStart={() => handleFlushButtonPress('service')}
-              onTouchEnd={() => handleFlushButtonRelease('service')}
               disabled={activeProcess && activeProcess !== 'service'}
             >
               <BuildIcon className="icon" />
@@ -394,7 +433,11 @@ function ManualControl({ language = 'pl', t = (key) => key, globalAutoRefresh = 
             </button>
             <button
               className="btn-service freeze-drain-start"
-              onClick={() => handleServiceFunction('FreezeDrainG', t('freezeDrainStart'))}
+              onPointerDown={(e) => {
+                e.preventDefault();
+                handleServiceFunction('FreezeDrainG', t('freezeDrainStart'));
+              }}
+              onContextMenu={preventContextMenu}
               disabled={activeProcess !== null}
             >
               <AcUnitIcon className="icon" />
@@ -402,7 +445,11 @@ function ManualControl({ language = 'pl', t = (key) => key, globalAutoRefresh = 
             </button>
             <button
               className={`btn-service universal-stop ${activeProcess ? 'active' : ''}`}
-              onClick={handleUniversalStop}
+              onPointerDown={(e) => {
+                e.preventDefault();
+                handleUniversalStop();
+              }}
+              onContextMenu={preventContextMenu}
               disabled={!activeProcess}
             >
               <StopIcon className="icon" />
@@ -425,7 +472,8 @@ function ManualControl({ language = 'pl', t = (key) => key, globalAutoRefresh = 
                 <button
                   key={led.id}
                   className={`btn-output output-full ${led.on ? 'active' : ''}`}
-                  onClick={() => handleToggleOutput(led.id, led.on)}
+                  onPointerDown={(e) => handleToggleOutput(e, led.id, led.on)}
+                  onContextMenu={(e) => e.preventDefault()}
                   title={rawLabel}
                 >
                   {led.on ? <LightbulbIcon className="icon" /> : <PowerOffIcon className="icon" />}
