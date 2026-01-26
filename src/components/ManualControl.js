@@ -290,7 +290,7 @@ function ManualControl({ language = 'pl', t = (key) => key, globalAutoRefresh = 
       if (flushProgress.active && flushProgress.type === 'normal') {
         setPendingUpdate(prev => ({ ...prev, normal: true }));
         flushStartTimer.current = setTimeout(() => {
-          updateFlushCount('normal', normalFlushCounter).finally(() => {
+          updateFlushCount('normalFlush', normalFlushCounter).finally(() => {
             setPendingUpdate(prev => ({ ...prev, normal: false }));
           });
         }, 500);
@@ -299,7 +299,7 @@ function ManualControl({ language = 'pl', t = (key) => key, globalAutoRefresh = 
       else if (!flushProgress.active) {
         setPendingUpdate(prev => ({ ...prev, normal: true }));
         flushStartTimer.current = setTimeout(() => {
-          startFlushOperation('normal', normalFlushCounter).finally(() => {
+          startFlushOperation('normalFlush', normalFlushCounter).finally(() => {
             setPendingUpdate(prev => ({ ...prev, normal: false }));
           });
         }, 500);
